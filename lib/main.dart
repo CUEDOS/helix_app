@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:helixio_app/pages/menu.dart';
+import 'package:helixio_app/pages/home_page.dart';
 import 'package:helixio_app/pages/control.dart';
 import 'package:helixio_app/pages/swarm_setup.dart';
 import 'package:helixio_app/pages/sitl_setup.dart';
@@ -29,14 +29,5 @@ class MyApp extends StatelessWidget {
         '/settings': (context) => const SettingsScreen(),
       },
     );
-  }
-}
-
-class HomePage extends StatelessWidget {
-  const HomePage({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(body: MainMenu());
   }
 }
