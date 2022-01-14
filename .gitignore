@@ -861,3 +861,6 @@ Temporary Items
 # Archives         - https://github.com/github/gitignore/blob/main/Global/Archives.gitignore
 # Backup           - https://github.com/github/gitignore/blob/main/Global/Backup.gitignore
 # JEnv             - https://github.com/github/gitignore/blob/main/Global/JEnv.gitignore
+build/4f2a58af27abc49ecf55570043bbf938.cache.dill.track.dill
+build/linux/x64/debug/.ninja_deps
+build/linux/x64/debug/.ninja_log
