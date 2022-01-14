@@ -1,0 +1,4 @@
+#Wed Jan 12 18:34:59 GMT 2022
+base.0=/home/r32401vc/helixio_app/build/app/intermediates/dex/debug/mergeDexDebug/classes.dex
+renamed.0=classes.dex
+path.0=classes.dex
