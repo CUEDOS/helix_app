@@ -1,33 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:helixio_app/pages/app_menu.dart';
+import 'package:helixio_app/pages/split_view.dart';
 
-import 'package:helixio_app/pages/home_page.dart';
-import 'package:helixio_app/pages/control.dart';
-import 'package:helixio_app/pages/swarm_setup.dart';
-import 'package:helixio_app/pages/sitl_setup.dart';
-import 'package:helixio_app/pages/feedback.dart';
-import 'package:helixio_app/pages/settings.dart';
+void main() {
+  runApp(const ProviderScope(child: MyApp()));
+}
 
-void main() => runApp(const MyApp());
-
-class MyApp extends StatelessWidget {
+// 1. extend from ConsumerWidget
+class MyApp extends ConsumerWidget {
   const MyApp({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // 3. watch selectedPageBuilderProvider
+    final selectedPageBuilder = ref.watch(selectedPageBuilderProvider);
     return MaterialApp(
-      title: 'Helixio Desktop',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      initialRoute: '/',
-      routes: {
-        '/': (context) => const HomePage(),
-        '/control': (context) => const ControlScreen(),
-        '/swarm_setup': (context) => const SwarmSetupScreen(),
-        '/sitl_setup': (context) => const SITLSetupScreen(),
-        '/feedback': (context) => const FeedbackScreen(),
-        '/settings': (context) => const SettingsScreen(),
-      },
+      home: SplitView(
+        menu: const AppMenu(),
+        content: selectedPageBuilder(context),
+      ),
     );
   }
 }
