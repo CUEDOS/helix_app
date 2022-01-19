@@ -1,7 +1,14 @@
+enum MQTTAppConnectionState {
+  connected,
+  disconnected,
+  connecting,
+  connectedSubscribed,
+  connectedUnSubscribed
+}
 
-enum MQTTAppConnectionState { connected, disconnected, connecting, connectedSubscribed, connectedUnSubscribed }
-class MQTTAppState{
-  MQTTAppConnectionState _appConnectionState = MQTTAppConnectionState.disconnected;
+class MQTTAppState {
+  MQTTAppConnectionState _appConnectionState =
+      MQTTAppConnectionState.disconnected;
   String _receivedText = '';
   String _historyText = '';
 
@@ -9,6 +16,7 @@ class MQTTAppState{
     _receivedText = text;
     _historyText = _historyText + '\n' + _receivedText;
   }
+
   void setAppConnectionState(MQTTAppConnectionState state) {
     _appConnectionState = state;
   }
@@ -17,8 +25,8 @@ class MQTTAppState{
     _historyText = "";
     _receivedText = "";
   }
+
   String get getReceivedText => _receivedText;
   String get getHistoryText => _historyText;
   MQTTAppConnectionState get getAppConnectionState => _appConnectionState;
-
 }

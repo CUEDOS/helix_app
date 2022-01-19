@@ -38,13 +38,7 @@ class _ControlPageState extends State<ControlPage> {
       _controller.jumpTo(_controller.position.maxScrollExtent);
     }
 
-    return PageScaffold(
-        title: 'Control',
-        //appBar: _buildAppBar(context) as PreferredSizeWidget?,
-        // body: _manager.currentState == null
-        //     ? CircularProgressIndicator()
-        //     : _buildColumn(_manager));
-        body: _buildColumn(_manager));
+    return PageScaffold(title: 'Control', body: _buildColumn(_manager));
   }
 
   Widget _buildColumn(MQTTManager manager) {
@@ -53,8 +47,30 @@ class _ControlPageState extends State<ControlPage> {
         StatusBar(
             statusMessage: prepareStateMessageFrom(
                 manager.currentState.getAppConnectionState)),
-        _buildControlButton(
-            manager.currentState.getAppConnectionState, 'Arm', 'arm'),
+        Wrap(
+          children: [
+            _buildControlButton(
+                manager.currentState.getAppConnectionState, 'Arm', 'arm'),
+            _buildControlButton(manager.currentState.getAppConnectionState,
+                'Takeoff', 'takeoff'),
+            _buildControlButton(
+                manager.currentState.getAppConnectionState, 'Hold', 'hold'),
+            _buildControlButton(
+                manager.currentState.getAppConnectionState, 'Return', 'return'),
+            _buildControlButton(
+                manager.currentState.getAppConnectionState, 'Start', 'start'),
+          ],
+        ),
+        Align(
+          alignment: Alignment.topLeft,
+          child: Wrap(
+              //alignment: WrapAlignment.start,
+              children: <Widget>[
+                _buildInfoCard('P101', 'Disconnected'),
+                _buildInfoCard('P102', 'Disconnected'),
+                _buildInfoCard('P103', 'Disconnected'),
+              ]),
+        ),
       ],
     );
   }
@@ -111,17 +127,91 @@ class _ControlPageState extends State<ControlPage> {
   Widget _buildControlButton(
       MQTTAppConnectionState state, String buttonText, String command) {
     return Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(8.0),
         child: ElevatedButton(
           child: Text(buttonText),
           style: ElevatedButton.styleFrom(
-              fixedSize: const Size(240, 80), primary: Colors.deepOrange),
+              fixedSize: const Size(88, 36), primary: Colors.deepOrange),
           onPressed: state == MQTTAppConnectionState.connectedSubscribed
               ? () {
                   _publishMessage(command);
                 }
-              : null, //
+              : null,
         ));
+  }
+
+  Widget _buildInfoCard(String droneID, String connectionStatus) {
+    return SizedBox(
+      width: 150.0,
+      //height: 300.0,
+      child: Card(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            ListTile(
+              //dense: true,
+              //leading: Icon(Icons.airplanemode_active),
+              title: Text(droneID),
+              subtitle: Text(connectionStatus),
+            ),
+            const Divider(
+              height: 0,
+              thickness: 2,
+              indent: 5,
+              endIndent: 5,
+              color: Colors.grey,
+            ),
+            //const SizedBox(width: 8),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(5.0),
+                  alignment: Alignment.topLeft,
+                  child: Row(
+                    children: const [
+                      Icon(Icons.battery_full_sharp),
+                      Text('100%'),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.all(5.0),
+                  alignment: Alignment.topLeft,
+                  child: Row(
+                    children: const [
+                      Icon(Icons.wifi),
+                      Text('50dB'),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                const Icon(Icons.airplanemode_active),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Container(
+                      color: Colors.green,
+                      child: const Center(child: Text('DISARMED')),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            Align(
+              alignment: Alignment.bottomRight,
+              child: TextButton(
+                child: const Text('SELECT'),
+                onPressed: () {/* ... */},
+              ),
+            ),
+            //const SizedBox(width: 8),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildSendButtonFrom(MQTTAppConnectionState state) {
@@ -216,11 +306,11 @@ class _ControlPageState extends State<ControlPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Error"),
+          title: const Text("Error"),
           content: Text(message),
           actions: <Widget>[
-            FlatButton(
-              child: Text("Close"),
+            TextButton(
+              child: const Text("Close"),
               onPressed: () {
                 Navigator.of(context).pop();
               },

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 
 class StatusBar extends StatelessWidget {
   String _statusMessage;
-  StatusBar({required statusMessage}): _statusMessage = statusMessage;
+  StatusBar({Key? key, required statusMessage})
+      : _statusMessage = statusMessage,
+        super(key: key);
 
   @override
   Widget build(BuildContext context) {
