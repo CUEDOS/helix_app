@@ -47,81 +47,37 @@ class _ControlPageState extends State<ControlPage> {
         StatusBar(
             statusMessage: prepareStateMessageFrom(
                 manager.currentState.getAppConnectionState)),
-        Wrap(
-          children: [
-            _buildControlButton(
-                manager.currentState.getAppConnectionState, 'Arm', 'arm'),
-            _buildControlButton(manager.currentState.getAppConnectionState,
-                'Takeoff', 'takeoff'),
-            _buildControlButton(
-                manager.currentState.getAppConnectionState, 'Hold', 'hold'),
-            _buildControlButton(
-                manager.currentState.getAppConnectionState, 'Return', 'return'),
-            _buildControlButton(
-                manager.currentState.getAppConnectionState, 'Start', 'start'),
-          ],
+        Align(
+          alignment: Alignment.topLeft,
+          child: Wrap(
+            children: [
+              _buildControlButton(
+                  manager.currentState.getAppConnectionState, 'Arm', 'arm'),
+              _buildControlButton(manager.currentState.getAppConnectionState,
+                  'Takeoff', 'takeoff'),
+              _buildControlButton(
+                  manager.currentState.getAppConnectionState, 'Hold', 'hold'),
+              _buildControlButton(manager.currentState.getAppConnectionState,
+                  'Return', 'return'),
+              _buildControlButton(
+                  manager.currentState.getAppConnectionState, 'Land', 'land'),
+              _buildControlButton(
+                  manager.currentState.getAppConnectionState, 'Start', 'start'),
+            ],
+          ),
         ),
         Align(
           alignment: Alignment.topLeft,
           child: Wrap(
               //alignment: WrapAlignment.start,
               children: <Widget>[
-                _buildInfoCard('P101', 'Disconnected'),
-                _buildInfoCard('P102', 'Disconnected'),
-                _buildInfoCard('P103', 'Disconnected'),
+                _buildInfoCard('P101', 'Disconnected', 100, 50, 'HOLD'),
+                _buildInfoCard('P102', 'Disconnected', 100, 50, 'HOLD'),
+                _buildInfoCard('P103', 'Disconnected', 100, 50, 'HOLD'),
               ]),
         ),
       ],
     );
-  }
-
-  Widget _buildEditableColumn(MQTTAppState currentAppState) {
-    return Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: Column(
-        children: <Widget>[
-          _buildTopicSubscribeRow(currentAppState),
-          const SizedBox(height: 10),
-          _buildPublishMessageRow(currentAppState),
-          const SizedBox(height: 10),
-          _buildScrollableTextWith(currentAppState.getHistoryText)
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPublishMessageRow(MQTTAppState currentAppState) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: <Widget>[
-        Expanded(
-          child: _buildTextFieldWith(_messageTextController, 'Enter a message',
-              currentAppState.getAppConnectionState),
-        ),
-        _buildSendButtonFrom(currentAppState.getAppConnectionState)
-      ],
-    );
-  }
-
-  Widget _buildTextFieldWith(TextEditingController controller, String hintText,
-      MQTTAppConnectionState state) {
-    bool shouldEnable = false;
-    if (controller == _messageTextController &&
-        state == MQTTAppConnectionState.connectedSubscribed) {
-      shouldEnable = true;
-    } else if ((controller == _topicTextController &&
-        (state == MQTTAppConnectionState.connected ||
-            state == MQTTAppConnectionState.connectedUnSubscribed))) {
-      shouldEnable = true;
-    }
-    return TextField(
-        enabled: shouldEnable,
-        controller: controller,
-        decoration: InputDecoration(
-          contentPadding:
-              const EdgeInsets.only(left: 0, bottom: 0, top: 0, right: 0),
-          labelText: hintText,
-        ));
   }
 
   Widget _buildControlButton(
@@ -131,16 +87,19 @@ class _ControlPageState extends State<ControlPage> {
         child: ElevatedButton(
           child: Text(buttonText),
           style: ElevatedButton.styleFrom(
-              fixedSize: const Size(88, 36), primary: Colors.deepOrange),
-          onPressed: state == MQTTAppConnectionState.connectedSubscribed
+            fixedSize: const Size(88, 36),
+            //primary: Colors.deepOrange
+          ),
+          onPressed: state == MQTTAppConnectionState.connected
               ? () {
-                  _publishMessage(command);
+                  _publishMessage('commands', command);
                 }
               : null,
         ));
   }
 
-  Widget _buildInfoCard(String droneID, String connectionStatus) {
+  Widget _buildInfoCard(String droneID, String connectionStatus,
+      int batteryPercentage, int wifiStrength, String currentCommand) {
     return SizedBox(
       width: 150.0,
       //height: 300.0,
@@ -168,9 +127,9 @@ class _ControlPageState extends State<ControlPage> {
                   padding: const EdgeInsets.all(5.0),
                   alignment: Alignment.topLeft,
                   child: Row(
-                    children: const [
-                      Icon(Icons.battery_full_sharp),
-                      Text('100%'),
+                    children: [
+                      const Icon(Icons.battery_full_sharp),
+                      Text(batteryPercentage.toString() + '%'),
                     ],
                   ),
                 ),
@@ -178,9 +137,9 @@ class _ControlPageState extends State<ControlPage> {
                   padding: const EdgeInsets.all(5.0),
                   alignment: Alignment.topLeft,
                   child: Row(
-                    children: const [
-                      Icon(Icons.wifi),
-                      Text('50dB'),
+                    children: [
+                      const Icon(Icons.wifi),
+                      Text(wifiStrength.toString() + 'dB'),
                     ],
                   ),
                 ),
@@ -194,7 +153,7 @@ class _ControlPageState extends State<ControlPage> {
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: Container(
                       color: Colors.green,
-                      child: const Center(child: Text('DISARMED')),
+                      child: Center(child: Text(currentCommand)),
                     ),
                   ),
                 ),
@@ -214,89 +173,8 @@ class _ControlPageState extends State<ControlPage> {
     );
   }
 
-  Widget _buildSendButtonFrom(MQTTAppConnectionState state) {
-    return RaisedButton(
-      color: Colors.green,
-      disabledColor: Colors.grey,
-      textColor: Colors.white,
-      disabledTextColor: Colors.black38,
-      child: const Text('Send'),
-      onPressed: state == MQTTAppConnectionState.connectedSubscribed
-          ? () {
-              _publishMessage(_messageTextController.text);
-            }
-          : null, //
-    );
-  }
-
-  Widget _buildTopicSubscribeRow(MQTTAppState currentAppState) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: <Widget>[
-        Expanded(
-          child: _buildTextFieldWith(
-              _topicTextController,
-              'Enter a topic to subscribe or listen',
-              currentAppState.getAppConnectionState),
-        ),
-        _buildSubscribeButtonFrom(currentAppState.getAppConnectionState)
-      ],
-    );
-  }
-
-  Widget _buildSubscribeButtonFrom(MQTTAppConnectionState state) {
-    return RaisedButton(
-      color: Colors.green,
-      disabledColor: Colors.grey,
-      textColor: Colors.white,
-      disabledTextColor: Colors.black38,
-      child: state == MQTTAppConnectionState.connectedSubscribed
-          ? const Text('Unsubscribe')
-          : const Text('Subscribe'),
-      onPressed: (state == MQTTAppConnectionState.connectedSubscribed) ||
-              (state == MQTTAppConnectionState.connectedUnSubscribed) ||
-              (state == MQTTAppConnectionState.connected)
-          ? () {
-              _handleSubscribePress(state);
-            }
-          : null, //
-    );
-  }
-
-  Widget _buildScrollableTextWith(String text) {
-    return Padding(
-      padding: const EdgeInsets.all(5.0),
-      child: Container(
-        padding: const EdgeInsets.only(left: 10.0, right: 5.0),
-        width: 400,
-        height: 100,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: Colors.black12,
-        ),
-        child: SingleChildScrollView(
-          controller: _controller,
-          child: Text(text),
-        ),
-      ),
-    );
-  }
-
-  void _handleSubscribePress(MQTTAppConnectionState state) {
-    if (state == MQTTAppConnectionState.connectedSubscribed) {
-      _manager.unSubscribeFromCurrentTopic();
-    } else {
-      String enteredText = _topicTextController.text;
-      if (enteredText != null && enteredText.isNotEmpty) {
-        _manager.subScribeTo(_topicTextController.text);
-      } else {
-        _showDialog("Please enter a topic.");
-      }
-    }
-  }
-
-  void _publishMessage(String message) {
-    _manager.publish(message);
+  void _publishMessage(String topic, String message) {
+    _manager.publish('commands', message);
     _messageTextController.clear();
   }
 

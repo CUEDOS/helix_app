@@ -21,7 +21,7 @@ class MyApp extends ConsumerWidget {
     // 3. watch selectedPageBuilderProvider
     final selectedPageBuilder = ref.watch(selectedPageBuilderProvider);
     return provider.ChangeNotifierProvider<MQTTManager>(
-        create: (context) => service_locator<MQTTManager>(),
+        create: (context) => serviceLocator<MQTTManager>(),
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
           theme: ThemeData(

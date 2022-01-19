@@ -112,9 +112,11 @@ class _MQTTConsolePageState extends State<MQTTConsolePage> {
       textColor: Colors.white,
       disabledTextColor: Colors.black38,
       child: const Text('Send'),
-      onPressed: state == MQTTAppConnectionState.connectedSubscribed
+      onPressed: state == MQTTAppConnectionState.connectedSubscribed &&
+              _topicTextController.text.isNotEmpty
           ? () {
-              _publishMessage(_messageTextController.text);
+              _publishMessage(
+                  _topicTextController.text, _messageTextController.text);
             }
           : null, //
     );
@@ -186,8 +188,8 @@ class _MQTTConsolePageState extends State<MQTTConsolePage> {
     }
   }
 
-  void _publishMessage(String message) {
-    _manager.publish(message);
+  void _publishMessage(String topic, String message) {
+    _manager.publish(topic, message);
     _messageTextController.clear();
   }
 
