@@ -1,22 +1,20 @@
-//import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:helixio_app/modules/core/managers/MQTTManager.dart';
 import 'package:helixio_app/modules/core/models/MQTTAppState.dart';
 import 'package:helixio_app/modules/core/widgets/status_bar.dart';
-//import 'package:helixio_app/modules/helpers/screen_route.dart';
 import 'package:helixio_app/modules/helpers/status_info_message_utils.dart';
 import 'package:helixio_app/pages/page_scaffold.dart';
 
-class ControlPage extends StatefulWidget {
-  const ControlPage({Key? key}) : super(key: key);
+class MQTTConsolePage extends StatefulWidget {
+  const MQTTConsolePage({Key? key}) : super(key: key);
 
   @override
-  _ControlPageState createState() => _ControlPageState();
+  _MQTTConsolePageState createState() => _MQTTConsolePageState();
 }
 
-class _ControlPageState extends State<ControlPage> {
+class _MQTTConsolePageState extends State<MQTTConsolePage> {
   final TextEditingController _messageTextController = TextEditingController();
   final TextEditingController _topicTextController = TextEditingController();
   final _controller = ScrollController();
@@ -53,8 +51,7 @@ class _ControlPageState extends State<ControlPage> {
         StatusBar(
             statusMessage: prepareStateMessageFrom(
                 manager.currentState.getAppConnectionState)),
-        _buildControlButton(
-            manager.currentState.getAppConnectionState, 'Arm', 'arm'),
+        _buildEditableColumn(manager.currentState),
       ],
     );
   }
@@ -105,22 +102,6 @@ class _ControlPageState extends State<ControlPage> {
           contentPadding:
               const EdgeInsets.only(left: 0, bottom: 0, top: 0, right: 0),
           labelText: hintText,
-        ));
-  }
-
-  Widget _buildControlButton(
-      MQTTAppConnectionState state, String buttonText, String command) {
-    return Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ElevatedButton(
-          child: Text(buttonText),
-          style: ElevatedButton.styleFrom(
-              fixedSize: const Size(240, 80), primary: Colors.deepOrange),
-          onPressed: state == MQTTAppConnectionState.connectedSubscribed
-              ? () {
-                  _publishMessage(command);
-                }
-              : null, //
         ));
   }
 
