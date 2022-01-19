@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
-import '../models/MQTTAppState.dart';
+import '../models/mqtt_app_state.dart';
 
 class MQTTManager extends ChangeNotifier {
   // Private instance of client
@@ -110,7 +110,7 @@ class MQTTManager extends ChangeNotifier {
     _client!.updates!.listen((List<MqttReceivedMessage<MqttMessage>> c) {
       final MqttPublishMessage recMess = c[0].payload as MqttPublishMessage;
       final String pt =
-          MqttPublishPayload.bytesToStringAsString(recMess.payload.message!);
+          MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
       _currentState.setReceivedText(pt);
       updateState();
       print(
@@ -121,7 +121,7 @@ class MQTTManager extends ChangeNotifier {
         'EXAMPLE::OnConnected client callback - Client connection was sucessful');
   }
 
-  void subScribeTo(String topic) {
+  void subscribeTo(String topic) {
     // Save topic for future use
     _topic = topic;
     _client!.subscribe(topic, MqttQos.atLeastOnce);

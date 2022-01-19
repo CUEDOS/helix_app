@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:helixio_app/modules/core/managers/MQTTManager.dart';
-import 'package:helixio_app/modules/core/models/MQTTAppState.dart';
+import 'package:helixio_app/modules/core/managers/mqtt_manager.dart';
+import 'package:helixio_app/modules/core/models/mqtt_app_state.dart';
 import 'package:helixio_app/modules/core/widgets/status_bar.dart';
 import 'package:helixio_app/modules/helpers/status_info_message_utils.dart';
 import 'package:helixio_app/pages/page_scaffold.dart';
@@ -36,13 +36,7 @@ class _MQTTConsolePageState extends State<MQTTConsolePage> {
       _controller.jumpTo(_controller.position.maxScrollExtent);
     }
 
-    return PageScaffold(
-        title: 'Control',
-        //appBar: _buildAppBar(context) as PreferredSizeWidget?,
-        // body: _manager.currentState == null
-        //     ? CircularProgressIndicator()
-        //     : _buildColumn(_manager));
-        body: _buildColumn(_manager));
+    return PageScaffold(title: 'Control', body: _buildColumn(_manager));
   }
 
   Widget _buildColumn(MQTTManager manager) {
@@ -181,7 +175,7 @@ class _MQTTConsolePageState extends State<MQTTConsolePage> {
     } else {
       String enteredText = _topicTextController.text;
       if (enteredText != null && enteredText.isNotEmpty) {
-        _manager.subScribeTo(_topicTextController.text);
+        _manager.subscribeTo(_topicTextController.text);
       } else {
         _showDialog("Please enter a topic.");
       }

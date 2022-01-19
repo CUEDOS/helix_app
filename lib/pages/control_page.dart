@@ -2,8 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:helixio_app/modules/core/managers/MQTTManager.dart';
-import 'package:helixio_app/modules/core/models/MQTTAppState.dart';
+import 'package:helixio_app/modules/core/managers/mqtt_manager.dart';
+import 'package:helixio_app/modules/core/models/mqtt_app_state.dart';
 import 'package:helixio_app/modules/core/widgets/status_bar.dart';
 //import 'package:helixio_app/modules/helpers/screen_route.dart';
 import 'package:helixio_app/modules/helpers/status_info_message_utils.dart';
@@ -17,6 +17,7 @@ class ControlPage extends StatefulWidget {
 }
 
 class _ControlPageState extends State<ControlPage> {
+  String _dropdownValue = 'Simple Flocking';
   final TextEditingController _messageTextController = TextEditingController();
   final TextEditingController _topicTextController = TextEditingController();
   final _controller = ScrollController();
@@ -42,41 +43,72 @@ class _ControlPageState extends State<ControlPage> {
   }
 
   Widget _buildColumn(MQTTManager manager) {
-    return Column(
-      children: <Widget>[
-        StatusBar(
-            statusMessage: prepareStateMessageFrom(
-                manager.currentState.getAppConnectionState)),
-        Align(
-          alignment: Alignment.topLeft,
-          child: Wrap(
-            children: [
-              _buildControlButton(
-                  manager.currentState.getAppConnectionState, 'Arm', 'arm'),
-              _buildControlButton(manager.currentState.getAppConnectionState,
-                  'Takeoff', 'takeoff'),
-              _buildControlButton(
-                  manager.currentState.getAppConnectionState, 'Hold', 'hold'),
-              _buildControlButton(manager.currentState.getAppConnectionState,
-                  'Return', 'return'),
-              _buildControlButton(
-                  manager.currentState.getAppConnectionState, 'Land', 'land'),
-              _buildControlButton(
-                  manager.currentState.getAppConnectionState, 'Start', 'start'),
-            ],
+    return SingleChildScrollView(
+      scrollDirection: Axis.vertical,
+      primary: false,
+      child: Column(
+        children: <Widget>[
+          StatusBar(
+              statusMessage: prepareStateMessageFrom(
+                  manager.currentState.getAppConnectionState)),
+          Align(
+            alignment: Alignment.topLeft,
+            child: Wrap(
+              children: [
+                _buildControlButton(
+                    manager.currentState.getAppConnectionState, 'Arm', 'arm'),
+                _buildControlButton(manager.currentState.getAppConnectionState,
+                    'Takeoff', 'takeoff'),
+                _buildControlButton(
+                    manager.currentState.getAppConnectionState, 'Hold', 'hold'),
+                _buildControlButton(manager.currentState.getAppConnectionState,
+                    'Return', 'return'),
+                _buildControlButton(
+                    manager.currentState.getAppConnectionState, 'Land', 'land'),
+              ],
+            ),
           ),
-        ),
-        Align(
-          alignment: Alignment.topLeft,
-          child: Wrap(
-              //alignment: WrapAlignment.start,
-              children: <Widget>[
-                _buildInfoCard('P101', 'Disconnected', 100, 50, 'HOLD'),
-                _buildInfoCard('P102', 'Disconnected', 100, 50, 'HOLD'),
-                _buildInfoCard('P103', 'Disconnected', 100, 50, 'HOLD'),
-              ]),
-        ),
-      ],
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                DropdownButton<String>(
+                  value: _dropdownValue,
+                  icon: const Icon(Icons.airplanemode_active),
+                  hint: const Text('Select Command'),
+                  items: <String>['Simple Flocking', 'B', 'C', 'D']
+                      .map((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      _dropdownValue = newValue!;
+                    });
+                  },
+                ),
+                _buildControlButton(manager.currentState.getAppConnectionState,
+                    'Start', _dropdownValue),
+              ],
+            ),
+          ),
+          Align(
+            alignment: Alignment.topLeft,
+            child: Wrap(
+                //alignment: WrapAlignment.start,
+                children: <Widget>[
+                  _buildInfoCard('P101', 'Disconnected', 100, 50, 'HOLD'),
+                  _buildInfoCard('P102', 'Disconnected', 100, 50, 'HOLD'),
+                  _buildInfoCard('P103', 'Disconnected', 100, 50, 'HOLD'),
+                  _buildInfoCard('P104', 'Disconnected', 100, 50, 'HOLD'),
+                  _buildInfoCard('P105', 'Disconnected', 100, 50, 'HOLD'),
+                  _buildInfoCard('P106', 'Disconnected', 100, 50, 'HOLD'),
+                ]),
+          ),
+        ],
+      ),
     );
   }
 

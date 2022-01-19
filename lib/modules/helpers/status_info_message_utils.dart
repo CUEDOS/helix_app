@@ -1,4 +1,4 @@
-import 'package:helixio_app/modules/core/models/MQTTAppState.dart';
+import 'package:helixio_app/modules/core/models/mqtt_app_state.dart';
 
 String prepareStateMessageFrom(MQTTAppConnectionState state) {
   switch (state) {
