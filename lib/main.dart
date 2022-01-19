@@ -4,7 +4,7 @@ import 'package:provider/provider.dart' as provider;
 
 import 'package:helixio_app/pages/app_menu.dart';
 import 'package:helixio_app/pages/split_view.dart';
-import 'modules/core/managers/MQTTManager.dart';
+import 'modules/core/managers/mqtt_manager.dart';
 import 'modules/helpers/service_locator.dart';
 
 void main() {
