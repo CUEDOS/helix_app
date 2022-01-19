@@ -2,8 +2,8 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:helixio_app/modules/core/managers/MQTTManager.dart';
-import 'package:helixio_app/modules/core/models/MQTTAppState.dart';
+import 'package:helixio_app/modules/core/managers/mqtt_manager.dart';
+import 'package:helixio_app/modules/core/models/mqtt_app_state.dart';
 import 'package:helixio_app/modules/core/widgets/status_bar.dart';
 import 'package:helixio_app/modules/helpers/status_info_message_utils.dart';
 import 'package:provider/provider.dart';
