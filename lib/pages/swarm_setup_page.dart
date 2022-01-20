@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+
 import 'package:helixio_app/pages/page_scaffold.dart';
+import 'package:helixio_app/modules/core/managers/swarm_manager.dart';
 
 class SwarmSetupPage extends StatefulWidget {
   const SwarmSetupPage({Key? key}) : super(key: key);
@@ -27,7 +29,7 @@ class SwarmSizeSlider extends StatefulWidget {
 
 class _SwarmSizeSliderState extends State<SwarmSizeSlider> {
   double _currentSliderValue = 0;
-
+  late SwarmManager _swarmManager;
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -71,7 +73,10 @@ class _SwarmSizeSliderState extends State<SwarmSizeSlider> {
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          _swarmManager
+                              .initialiseSwarm(_currentSliderValue.toInt());
+                        },
                         child: const Text('Confirm'),
                       ),
                     ),

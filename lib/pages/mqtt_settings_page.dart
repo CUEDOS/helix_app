@@ -18,7 +18,7 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   final TextEditingController _hostTextController = TextEditingController();
-  late MQTTManager _manager;
+  late MQTTManager _mqttManager;
 
   @override
   void dispose() {
@@ -28,14 +28,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    _manager = Provider.of<MQTTManager>(context);
+    _mqttManager = Provider.of<MQTTManager>(context);
     return PageScaffold(
         //appBar: _buildAppBar(context) as PreferredSizeWidget?,
         title: 'MQTT Settings',
         // body: _manager.currentState == null
         //     ? const CircularProgressIndicator()
         //     : _buildColumn(_manager));
-        body: _buildColumn(_manager));
+        body: _buildColumn(_mqttManager));
   }
 
   Widget _buildColumn(MQTTManager manager) {
@@ -69,8 +69,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if ((controller == _hostTextController &&
         state == MQTTAppConnectionState.disconnected)) {
       shouldEnable = true;
-    } else if (controller == _hostTextController && _manager.host != null) {
-      _hostTextController.text = _manager.host!;
+    } else if (controller == _hostTextController && _mqttManager.host != null) {
+      _hostTextController.text = _mqttManager.host!;
     }
     return TextField(
         enabled: shouldEnable,
@@ -120,12 +120,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (Platform.isAndroid) {
       osPrefix = 'Flutter_Android';
     }
-    _manager.initializeMQTTClient(
+    _mqttManager.initializeMQTTClient(
         host: _hostTextController.text, identifier: osPrefix);
-    _manager.connect();
+    _mqttManager.connect();
   }
 
   void _disconnect() {
-    _manager.disconnect();
+    _mqttManager.disconnect();
   }
 }

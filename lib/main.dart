@@ -35,18 +35,3 @@ class MyApp extends ConsumerWidget {
         ));
   }
 }
-
-
-//     MaterialApp(
-//       debugShowCheckedModeBanner: false,
-//       theme: ThemeData(
-//         primarySwatch: Colors.blue,
-//         visualDensity: VisualDensity.adaptivePlatformDensity,
-//       ),
-//       home: SplitView(
-//         menu: const AppMenu(),
-//         content: selectedPageBuilder(context),
-//       ),
-//     );
-//   }
-// }
