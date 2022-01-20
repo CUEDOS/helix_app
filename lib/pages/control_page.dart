@@ -101,16 +101,22 @@ class _ControlPageState extends State<ControlPage> {
               builder: (context, swarmManager, child) {
                 return Wrap(
                     //alignment: WrapAlignment.start,
-                    children: <Widget>[
-                      for (var agentState in swarmManager.swarmArray)
-                        _buildInfoCard(agentState),
-                    ]);
+                    children: _buildInfoCardList(swarmManager.swarm.values));
               },
             ),
           ),
         ],
       ),
     );
+  }
+
+//wrap widget requires list of widgets so need to return list of cards from this function
+  List<Widget> _buildInfoCardList(Iterable<AgentState> agents) {
+    List<Widget> infoCards = [];
+    for (AgentState agent in agents) {
+      infoCards.add(_buildInfoCard(agent));
+    }
+    return infoCards;
   }
 
   Widget _buildControlButton(
