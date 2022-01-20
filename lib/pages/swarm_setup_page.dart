@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'package:helixio_app/pages/page_scaffold.dart';
 import 'package:helixio_app/modules/core/managers/swarm_manager.dart';
@@ -28,10 +29,11 @@ class SwarmSizeSlider extends StatefulWidget {
 }
 
 class _SwarmSizeSliderState extends State<SwarmSizeSlider> {
-  double _currentSliderValue = 0;
   late SwarmManager _swarmManager;
+  //double _currentSliderValue = 0;
   @override
   Widget build(BuildContext context) {
+    _swarmManager = Provider.of<SwarmManager>(context);
     return Column(
       children: [
         const Align(
@@ -51,20 +53,20 @@ class _SwarmSizeSliderState extends State<SwarmSizeSlider> {
                     children: [
                       Expanded(
                         child: Slider(
-                          value: _currentSliderValue,
+                          value: _swarmManager.swarmSize.toDouble(),
                           max: 10,
                           divisions: 10,
-                          label: _currentSliderValue.round().toString(),
+                          label: _swarmManager.swarmSize.toString(),
                           onChanged: (double value) {
                             setState(() {
-                              _currentSliderValue = value;
+                              _swarmManager.swarmSize = value.toInt();
                             });
                           },
                         ),
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text(_currentSliderValue.toInt().toString()),
+                        child: Text(_swarmManager.swarmSize.toString()),
                       ),
                     ],
                   ),
@@ -74,8 +76,9 @@ class _SwarmSizeSliderState extends State<SwarmSizeSlider> {
                       padding: const EdgeInsets.all(8.0),
                       child: ElevatedButton(
                         onPressed: () {
-                          _swarmManager
-                              .initialiseSwarm(_currentSliderValue.toInt());
+                          _swarmManager.initialiseSwarm(_swarmManager
+                              .swarmSize); //not good practice to pass a variable from the class back
+                          //into the method but it works, fix later
                         },
                         child: const Text('Confirm'),
                       ),

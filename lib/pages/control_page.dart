@@ -1,12 +1,13 @@
-//import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:helixio_app/modules/core/managers/swarm_manager.dart';
 import 'package:provider/provider.dart';
 
 import 'package:helixio_app/modules/core/managers/mqtt_manager.dart';
 import 'package:helixio_app/modules/core/models/mqtt_app_state.dart';
+import 'package:helixio_app/modules/core/models/agent_state.dart';
 import 'package:helixio_app/modules/core/widgets/status_bar.dart';
-//import 'package:helixio_app/modules/helpers/screen_route.dart';
 import 'package:helixio_app/modules/helpers/status_info_message_utils.dart';
+import 'package:helixio_app/modules/helpers/agent_command_utils.dart';
 import 'package:helixio_app/pages/page_scaffold.dart';
 
 class ControlPage extends StatefulWidget {
@@ -49,7 +50,7 @@ class _ControlPageState extends State<ControlPage> {
       child: Column(
         children: <Widget>[
           StatusBar(
-              statusMessage: prepareStateMessageFrom(
+              statusMessage: prepareMQTTStateMessageFrom(
                   manager.currentState.getAppConnectionState)),
           Align(
             alignment: Alignment.topLeft,
@@ -96,16 +97,16 @@ class _ControlPageState extends State<ControlPage> {
           ),
           Align(
             alignment: Alignment.topLeft,
-            child: Wrap(
-                //alignment: WrapAlignment.start,
-                children: <Widget>[
-                  _buildInfoCard('P101', 'Disconnected', 100, 50, 'HOLD'),
-                  _buildInfoCard('P102', 'Disconnected', 100, 50, 'HOLD'),
-                  _buildInfoCard('P103', 'Disconnected', 100, 50, 'HOLD'),
-                  _buildInfoCard('P104', 'Disconnected', 100, 50, 'HOLD'),
-                  _buildInfoCard('P105', 'Disconnected', 100, 50, 'HOLD'),
-                  _buildInfoCard('P106', 'Disconnected', 100, 50, 'HOLD'),
-                ]),
+            child: Consumer<SwarmManager>(
+              builder: (context, swarmManager, child) {
+                return Wrap(
+                    //alignment: WrapAlignment.start,
+                    children: <Widget>[
+                      for (var agentState in swarmManager.swarmArray)
+                        _buildInfoCard(agentState),
+                    ]);
+              },
+            ),
           ),
         ],
       ),
@@ -130,8 +131,7 @@ class _ControlPageState extends State<ControlPage> {
         ));
   }
 
-  Widget _buildInfoCard(String droneID, String connectionStatus,
-      int batteryPercentage, int wifiStrength, String currentCommand) {
+  Widget _buildInfoCard(AgentState _agentState) {
     return SizedBox(
       width: 150.0,
       //height: 300.0,
@@ -142,8 +142,8 @@ class _ControlPageState extends State<ControlPage> {
             ListTile(
               //dense: true,
               //leading: Icon(Icons.airplanemode_active),
-              title: Text(droneID),
-              subtitle: Text(connectionStatus),
+              title: Text(_agentState.getAgentID),
+              subtitle: Text(_agentState.getConnectionStatus),
             ),
             const Divider(
               height: 0,
@@ -161,7 +161,7 @@ class _ControlPageState extends State<ControlPage> {
                   child: Row(
                     children: [
                       const Icon(Icons.battery_full_sharp),
-                      Text(batteryPercentage.toString() + '%'),
+                      Text(_agentState.getBatteryLevel.toString() + '%'),
                     ],
                   ),
                 ),
@@ -171,7 +171,7 @@ class _ControlPageState extends State<ControlPage> {
                   child: Row(
                     children: [
                       const Icon(Icons.wifi),
-                      Text(wifiStrength.toString() + 'dB'),
+                      Text(_agentState.getWifiStrength.toString() + 'dB'),
                     ],
                   ),
                 ),
@@ -185,7 +185,9 @@ class _ControlPageState extends State<ControlPage> {
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: Container(
                       color: Colors.green,
-                      child: Center(child: Text(currentCommand)),
+                      child: Center(
+                          child: Text(prepareAgentStateMessageFrom(
+                              _agentState.getCurrentCommand))),
                     ),
                   ),
                 ),

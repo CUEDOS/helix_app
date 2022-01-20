@@ -43,7 +43,7 @@ class _MQTTConsolePageState extends State<MQTTConsolePage> {
     return Column(
       children: <Widget>[
         StatusBar(
-            statusMessage: prepareStateMessageFrom(
+            statusMessage: prepareMQTTStateMessageFrom(
                 manager.currentState.getAppConnectionState)),
         _buildEditableColumn(manager.currentState),
       ],
