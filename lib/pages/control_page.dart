@@ -140,10 +140,23 @@ class _ControlPageState extends State<ControlPage> {
           onPressed: state == MQTTAppConnectionState.connected ||
                   state == MQTTAppConnectionState.connectedSubscribed
               ? () {
-                  _publishMessage('commands', command);
+                  _handleControlPress(command);
                 }
               : null,
         ));
+  }
+
+  void _handleControlPress(String command) {
+    List<String> selected = serviceLocator<SwarmManager>().selected;
+    if (selected.isEmpty) {
+      for (String agent in serviceLocator<SwarmManager>().swarm.keys) {
+        _publishMessage('commands/' + agent, command);
+      }
+    } else {
+      for (String agent in selected) {
+        _publishMessage('commands/' + agent, command);
+      }
+    }
   }
 
   void _publishMessage(String topic, String message) {
@@ -183,15 +196,18 @@ class AgentInfoCard extends StatefulWidget {
 
 class AgentInfoCardState extends State<AgentInfoCard> {
   String _buttonText = 'SELECT';
+  bool _selected = false;
 
   toggleSelected() {
     if (_buttonText == 'SELECT') {
       setState(() {
+        _selected = true;
         _buttonText = 'UNSELECT';
         serviceLocator<SwarmManager>()
             .addSelected(widget.agentState.getAgentID);
       });
     } else {
+      _selected = false;
       _buttonText = 'SELECT';
       serviceLocator<SwarmManager>()
           .removeSelected(widget.agentState.getAgentID);
@@ -204,6 +220,13 @@ class AgentInfoCardState extends State<AgentInfoCard> {
       width: 150.0,
       //height: 300.0,
       child: Card(
+        shape: _selected
+            ? RoundedRectangleBorder(
+                side: const BorderSide(color: Colors.blue, width: 2.0),
+                borderRadius: BorderRadius.circular(4.0))
+            : RoundedRectangleBorder(
+                side: const BorderSide(color: Colors.white, width: 2.0),
+                borderRadius: BorderRadius.circular(4.0)),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
