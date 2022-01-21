@@ -3,6 +3,9 @@ import 'package:provider/provider.dart';
 
 import 'package:helixio_app/pages/page_scaffold.dart';
 import 'package:helixio_app/modules/core/managers/swarm_manager.dart';
+import 'package:helixio_app/modules/core/managers/mqtt_manager.dart';
+import 'package:helixio_app/modules/core/models/mqtt_app_state.dart';
+import 'package:helixio_app/modules/core/widgets/error_dialog.dart';
 
 class SwarmSetupPage extends StatefulWidget {
   const SwarmSetupPage({Key? key}) : super(key: key);
@@ -29,6 +32,7 @@ class SwarmSizeSlider extends StatefulWidget {
 }
 
 class _SwarmSizeSliderState extends State<SwarmSizeSlider> {
+  late MQTTManager _mqttManager;
   late SwarmManager _swarmManager;
   //double _currentSliderValue = 0;
   @override
@@ -76,9 +80,7 @@ class _SwarmSizeSliderState extends State<SwarmSizeSlider> {
                       padding: const EdgeInsets.all(8.0),
                       child: ElevatedButton(
                         onPressed: () {
-                          _swarmManager.initialiseSwarm(_swarmManager
-                              .swarmSize); //not good practice to pass a variable from the class back
-                          //into the method but it works, fix later
+                          _handleConfirmPress();
                         },
                         child: const Text('Confirm'),
                       ),
@@ -91,5 +93,17 @@ class _SwarmSizeSliderState extends State<SwarmSizeSlider> {
         ),
       ],
     );
+  }
+
+  void _handleConfirmPress() {
+    _mqttManager = Provider.of<MQTTManager>(context, listen: false);
+    if (_mqttManager.currentState.getAppConnectionState ==
+        MQTTAppConnectionState.connected) {
+      _swarmManager.initialiseSwarm(_swarmManager.swarmSize, _mqttManager);
+      //not good practice to pass a variable from the class back
+      ////into the method but it works, fix later
+    } else {
+      displayErrorDialog('Connect to a broker first!', context);
+    }
   }
 }

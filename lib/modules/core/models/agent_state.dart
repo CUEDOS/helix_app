@@ -20,13 +20,13 @@ class AgentState {
 
   AgentState(this._agentID);
 
-  void setConnected(bool connected) {
-    _connected = connected;
+  void setConnected(String connectionStatus) {
+    _connectionStatus = connectionStatus;
 
-    if (connected = true) {
-      _connectionStatus = 'Connected';
+    if (connectionStatus == 'Connected') {
+      _connected = true;
     } else {
-      _connectionStatus = 'Disconnected';
+      _connected = false;
     }
   }
 

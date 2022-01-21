@@ -193,11 +193,11 @@ class _MQTTConsolePageState extends State<MQTTConsolePage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Error"),
+          title: const Text("Error"),
           content: Text(message),
           actions: <Widget>[
-            FlatButton(
-              child: Text("Close"),
+            TextButton(
+              child: const Text("Close"),
               onPressed: () {
                 Navigator.of(context).pop();
               },

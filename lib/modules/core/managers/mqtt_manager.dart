@@ -1,12 +1,16 @@
 //import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:helixio_app/modules/helpers/service_locator.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 import '../models/mqtt_app_state.dart';
+import 'package:helixio_app/modules/core/managers/swarm_manager.dart';
+import 'package:provider/provider.dart';
 
 class MQTTManager extends ChangeNotifier {
   // Private instance of client
+  //late SwarmManager _swarmManager;
   MQTTAppState _currentState = MQTTAppState();
   MqttServerClient? _client;
   late String _identifier;
@@ -109,12 +113,13 @@ class MQTTManager extends ChangeNotifier {
     print('EXAMPLE::Mosquitto client connected....');
     _client!.updates!.listen((List<MqttReceivedMessage<MqttMessage>> c) {
       final MqttPublishMessage recMess = c[0].payload as MqttPublishMessage;
-      final String pt =
+      final String payload =
           MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
-      _currentState.setReceivedText(pt);
+      _currentState.setReceivedText(payload);
       updateState();
+      serviceLocator<SwarmManager>().handleMessage(c[0].topic, payload);
       print(
-          'EXAMPLE::Change notification:: topic is <${c[0].topic}>, payload is <-- $pt -->');
+          'EXAMPLE::Change notification:: topic is <${c[0].topic}>, payload is <-- $payload -->');
       print('');
     });
     print(

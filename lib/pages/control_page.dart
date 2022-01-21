@@ -77,8 +77,13 @@ class _ControlPageState extends State<ControlPage> {
                   value: _dropdownValue,
                   icon: const Icon(Icons.airplanemode_active),
                   hint: const Text('Select Command'),
-                  items: <String>['Simple Flocking', 'B', 'C', 'D']
-                      .map((String value) {
+                  items: <String>[
+                    'Simple Flocking',
+                    'Circle Helix',
+                    'Racetrack Helix',
+                    'Figure 8',
+                    'Double Racetrack'
+                  ].map((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
                       child: Text(value),
@@ -129,7 +134,8 @@ class _ControlPageState extends State<ControlPage> {
             fixedSize: const Size(88, 36),
             //primary: Colors.deepOrange
           ),
-          onPressed: state == MQTTAppConnectionState.connected
+          onPressed: state == MQTTAppConnectionState.connected ||
+                  state == MQTTAppConnectionState.connectedSubscribed
               ? () {
                   _publishMessage('commands', command);
                 }
@@ -214,7 +220,7 @@ class _ControlPageState extends State<ControlPage> {
   }
 
   void _publishMessage(String topic, String message) {
-    _manager.publish('commands', message);
+    _manager.publish(topic, message);
     _messageTextController.clear();
   }
 

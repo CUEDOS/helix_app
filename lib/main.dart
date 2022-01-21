@@ -25,7 +25,8 @@ class MyApp extends ConsumerWidget {
         providers: [
           provider.ChangeNotifierProvider(
               create: (context) => serviceLocator<MQTTManager>()),
-          provider.ChangeNotifierProvider(create: (context) => SwarmManager()),
+          provider.ChangeNotifierProvider(
+              create: (context) => serviceLocator<SwarmManager>()),
         ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
