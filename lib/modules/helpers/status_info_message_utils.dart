@@ -1,6 +1,6 @@
 import 'package:helixio_app/modules/core/models/mqtt_app_state.dart';
 
-String prepareStateMessageFrom(MQTTAppConnectionState state) {
+String prepareMQTTStateMessageFrom(MQTTAppConnectionState state) {
   switch (state) {
     case MQTTAppConnectionState.connected:
       return 'Connected';

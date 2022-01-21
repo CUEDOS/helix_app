@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import 'package:helixio_app/pages/page_scaffold.dart';
+import 'package:helixio_app/modules/core/managers/swarm_manager.dart';
+import 'package:helixio_app/modules/core/managers/mqtt_manager.dart';
+import 'package:helixio_app/modules/core/models/mqtt_app_state.dart';
+import 'package:helixio_app/modules/core/widgets/error_dialog.dart';
 
 class SwarmSetupPage extends StatefulWidget {
   const SwarmSetupPage({Key? key}) : super(key: key);
@@ -26,10 +32,12 @@ class SwarmSizeSlider extends StatefulWidget {
 }
 
 class _SwarmSizeSliderState extends State<SwarmSizeSlider> {
-  double _currentSliderValue = 0;
-
+  late MQTTManager _mqttManager;
+  late SwarmManager _swarmManager;
+  //double _currentSliderValue = 0;
   @override
   Widget build(BuildContext context) {
+    _swarmManager = Provider.of<SwarmManager>(context);
     return Column(
       children: [
         const Align(
@@ -49,20 +57,20 @@ class _SwarmSizeSliderState extends State<SwarmSizeSlider> {
                     children: [
                       Expanded(
                         child: Slider(
-                          value: _currentSliderValue,
+                          value: _swarmManager.swarmSize.toDouble(),
                           max: 10,
                           divisions: 10,
-                          label: _currentSliderValue.round().toString(),
+                          label: _swarmManager.swarmSize.toString(),
                           onChanged: (double value) {
                             setState(() {
-                              _currentSliderValue = value;
+                              _swarmManager.swarmSize = value.toInt();
                             });
                           },
                         ),
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text(_currentSliderValue.toInt().toString()),
+                        child: Text(_swarmManager.swarmSize.toString()),
                       ),
                     ],
                   ),
@@ -71,7 +79,9 @@ class _SwarmSizeSliderState extends State<SwarmSizeSlider> {
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          _handleConfirmPress();
+                        },
                         child: const Text('Confirm'),
                       ),
                     ),
@@ -83,5 +93,17 @@ class _SwarmSizeSliderState extends State<SwarmSizeSlider> {
         ),
       ],
     );
+  }
+
+  void _handleConfirmPress() {
+    _mqttManager = Provider.of<MQTTManager>(context, listen: false);
+    if (_mqttManager.currentState.getAppConnectionState ==
+        MQTTAppConnectionState.connected) {
+      _swarmManager.initialiseSwarm(_swarmManager.swarmSize, _mqttManager);
+      //not good practice to pass a variable from the class back
+      ////into the method but it works, fix later
+    } else {
+      displayErrorDialog('Connect to a broker first!', context);
+    }
   }
 }

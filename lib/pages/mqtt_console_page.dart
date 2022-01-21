@@ -19,7 +19,7 @@ class _MQTTConsolePageState extends State<MQTTConsolePage> {
   final TextEditingController _topicTextController = TextEditingController();
   final _controller = ScrollController();
 
-  late MQTTManager _manager;
+  late MQTTManager _mqttManager;
 
   @override
   void dispose() {
@@ -31,19 +31,19 @@ class _MQTTConsolePageState extends State<MQTTConsolePage> {
 
   @override
   Widget build(BuildContext context) {
-    _manager = Provider.of<MQTTManager>(context);
+    _mqttManager = Provider.of<MQTTManager>(context);
     if (_controller.hasClients) {
       _controller.jumpTo(_controller.position.maxScrollExtent);
     }
 
-    return PageScaffold(title: 'Control', body: _buildColumn(_manager));
+    return PageScaffold(title: 'Control', body: _buildColumn(_mqttManager));
   }
 
   Widget _buildColumn(MQTTManager manager) {
     return Column(
       children: <Widget>[
         StatusBar(
-            statusMessage: prepareStateMessageFrom(
+            statusMessage: prepareMQTTStateMessageFrom(
                 manager.currentState.getAppConnectionState)),
         _buildEditableColumn(manager.currentState),
       ],
@@ -171,11 +171,11 @@ class _MQTTConsolePageState extends State<MQTTConsolePage> {
 
   void _handleSubscribePress(MQTTAppConnectionState state) {
     if (state == MQTTAppConnectionState.connectedSubscribed) {
-      _manager.unSubscribeFromCurrentTopic();
+      _mqttManager.unSubscribeFromCurrentTopic();
     } else {
       String enteredText = _topicTextController.text;
       if (enteredText != null && enteredText.isNotEmpty) {
-        _manager.subscribeTo(_topicTextController.text);
+        _mqttManager.subscribeTo(_topicTextController.text);
       } else {
         _showDialog("Please enter a topic.");
       }
@@ -183,7 +183,7 @@ class _MQTTConsolePageState extends State<MQTTConsolePage> {
   }
 
   void _publishMessage(String topic, String message) {
-    _manager.publish(topic, message);
+    _mqttManager.publish(topic, message);
     _messageTextController.clear();
   }
 
@@ -193,11 +193,11 @@ class _MQTTConsolePageState extends State<MQTTConsolePage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Error"),
+          title: const Text("Error"),
           content: Text(message),
           actions: <Widget>[
-            FlatButton(
-              child: Text("Close"),
+            TextButton(
+              child: const Text("Close"),
               onPressed: () {
                 Navigator.of(context).pop();
               },

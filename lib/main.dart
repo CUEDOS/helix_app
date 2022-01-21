@@ -5,6 +5,7 @@ import 'package:provider/provider.dart' as provider;
 import 'package:helixio_app/pages/app_menu.dart';
 import 'package:helixio_app/pages/split_view.dart';
 import 'modules/core/managers/mqtt_manager.dart';
+import 'modules/core/managers/swarm_manager.dart';
 import 'modules/helpers/service_locator.dart';
 
 void main() {
@@ -20,8 +21,13 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // 3. watch selectedPageBuilderProvider
     final selectedPageBuilder = ref.watch(selectedPageBuilderProvider);
-    return provider.ChangeNotifierProvider<MQTTManager>(
-        create: (context) => serviceLocator<MQTTManager>(),
+    return provider.MultiProvider(
+        providers: [
+          provider.ChangeNotifierProvider(
+              create: (context) => serviceLocator<MQTTManager>()),
+          provider.ChangeNotifierProvider(
+              create: (context) => serviceLocator<SwarmManager>()),
+        ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
@@ -35,18 +41,3 @@ class MyApp extends ConsumerWidget {
         ));
   }
 }
-
-
-//     MaterialApp(
-//       debugShowCheckedModeBanner: false,
-//       theme: ThemeData(
-//         primarySwatch: Colors.blue,
-//         visualDensity: VisualDensity.adaptivePlatformDensity,
-//       ),
-//       home: SplitView(
-//         menu: const AppMenu(),
-//         content: selectedPageBuilder(context),
-//       ),
-//     );
-//   }
-// }

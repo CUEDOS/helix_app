@@ -12,6 +12,7 @@ class AgentState {
   //String _historyText = '';
   final String _agentID;
   bool _connected = false;
+  String _connectionStatus = 'Disconnected';
   int _batteryLevel = 0;
   int _wifiStrength = 0;
   //String _currentCommand = 'none';
@@ -19,8 +20,14 @@ class AgentState {
 
   AgentState(this._agentID);
 
-  void setConnected(bool connected) {
-    _connected = connected;
+  void setConnected(String connectionStatus) {
+    _connectionStatus = connectionStatus;
+
+    if (connectionStatus == 'Connected') {
+      _connected = true;
+    } else {
+      _connected = false;
+    }
   }
 
   void setBatteryLevel(int batteryLevel) {
@@ -37,6 +44,7 @@ class AgentState {
 
   String get getAgentID => _agentID;
   bool get getConnected => _connected;
+  String get getConnectionStatus => _connectionStatus;
   int get getBatteryLevel => _batteryLevel;
   int get getWifiStrength => _wifiStrength;
   agentCommand get getCurrentCommand => _currentCommand;
