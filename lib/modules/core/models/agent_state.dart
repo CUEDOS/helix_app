@@ -13,6 +13,7 @@ class AgentState {
   final String _agentID;
   bool _connected = false;
   String _connectionStatus = 'Disconnected';
+  String _flightMode = 'NONE';
   int _batteryLevel = 0;
   int _wifiStrength = 0;
   //String _currentCommand = 'none';
@@ -38,6 +39,10 @@ class AgentState {
     _wifiStrength = wifiStrength;
   }
 
+  void setFlightMode(String flightMode) {
+    _flightMode = flightMode;
+  }
+
   void setCurrentCommand(agentCommand currentCommand) {
     _currentCommand = currentCommand;
   }
@@ -47,5 +52,6 @@ class AgentState {
   String get getConnectionStatus => _connectionStatus;
   int get getBatteryLevel => _batteryLevel;
   int get getWifiStrength => _wifiStrength;
+  String get getFlightMode => _flightMode;
   agentCommand get getCurrentCommand => _currentCommand;
 }
