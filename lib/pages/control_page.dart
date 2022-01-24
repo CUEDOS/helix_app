@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:helixio_app/modules/core/managers/swarm_manager.dart';
+import 'package:helixio_app/modules/helpers/service_locator.dart';
 import 'package:provider/provider.dart';
 
 import 'package:helixio_app/modules/core/managers/mqtt_manager.dart';
@@ -23,7 +24,7 @@ class _ControlPageState extends State<ControlPage> {
   final TextEditingController _topicTextController = TextEditingController();
   final _controller = ScrollController();
 
-  late MQTTManager _manager;
+  late MQTTManager _mqttManager;
 
   @override
   void dispose() {
@@ -35,12 +36,12 @@ class _ControlPageState extends State<ControlPage> {
 
   @override
   Widget build(BuildContext context) {
-    _manager = Provider.of<MQTTManager>(context);
+    _mqttManager = Provider.of<MQTTManager>(context);
     if (_controller.hasClients) {
       _controller.jumpTo(_controller.position.maxScrollExtent);
     }
 
-    return PageScaffold(title: 'Control', body: _buildColumn(_manager));
+    return PageScaffold(title: 'Control', body: _buildColumn(_mqttManager));
   }
 
   Widget _buildColumn(MQTTManager manager) {
@@ -106,7 +107,7 @@ class _ControlPageState extends State<ControlPage> {
               builder: (context, swarmManager, child) {
                 return Wrap(
                     //alignment: WrapAlignment.start,
-                    children: _buildInfoCardList(swarmManager.swarm.values));
+                    children: _buildInfoCardList(swarmManager));
               },
             ),
           ),
@@ -116,10 +117,12 @@ class _ControlPageState extends State<ControlPage> {
   }
 
 //wrap widget requires list of widgets so need to return list of cards from this function
-  List<Widget> _buildInfoCardList(Iterable<AgentState> agents) {
+  List<Widget> _buildInfoCardList(SwarmManager swarmManager) {
+    Iterable<AgentState> agents = swarmManager.swarm.values;
     List<Widget> infoCards = [];
     for (AgentState agent in agents) {
-      infoCards.add(_buildInfoCard(agent));
+      //infoCards.add(_buildInfoCard(agent));
+      infoCards.add(AgentInfoCard(agentState: agent));
     }
     return infoCards;
   }
@@ -137,90 +140,27 @@ class _ControlPageState extends State<ControlPage> {
           onPressed: state == MQTTAppConnectionState.connected ||
                   state == MQTTAppConnectionState.connectedSubscribed
               ? () {
-                  _publishMessage('commands', command);
+                  _handleControlPress(command);
                 }
               : null,
         ));
   }
 
-  Widget _buildInfoCard(AgentState _agentState) {
-    return SizedBox(
-      width: 150.0,
-      //height: 300.0,
-      child: Card(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            ListTile(
-              //dense: true,
-              //leading: Icon(Icons.airplanemode_active),
-              title: Text(_agentState.getAgentID),
-              subtitle: Text(_agentState.getConnectionStatus),
-            ),
-            const Divider(
-              height: 0,
-              thickness: 2,
-              indent: 5,
-              endIndent: 5,
-              color: Colors.grey,
-            ),
-            //const SizedBox(width: 8),
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(5.0),
-                  alignment: Alignment.topLeft,
-                  child: Row(
-                    children: [
-                      const Icon(Icons.battery_full_sharp),
-                      Text(_agentState.getBatteryLevel.toString() + '%'),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.all(5.0),
-                  alignment: Alignment.topLeft,
-                  child: Row(
-                    children: [
-                      const Icon(Icons.wifi),
-                      Text(_agentState.getWifiStrength.toString() + 'dB'),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            Row(
-              children: [
-                const Icon(Icons.airplanemode_active),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Container(
-                      color: Colors.green,
-                      child: Center(
-                          child: Text(prepareAgentStateMessageFrom(
-                              _agentState.getCurrentCommand))),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            Align(
-              alignment: Alignment.bottomRight,
-              child: TextButton(
-                child: const Text('SELECT'),
-                onPressed: () {/* ... */},
-              ),
-            ),
-            //const SizedBox(width: 8),
-          ],
-        ),
-      ),
-    );
+  void _handleControlPress(String command) {
+    List<String> selected = serviceLocator<SwarmManager>().selected;
+    if (selected.isEmpty) {
+      for (String agent in serviceLocator<SwarmManager>().swarm.keys) {
+        _publishMessage('commands/' + agent, command);
+      }
+    } else {
+      for (String agent in selected) {
+        _publishMessage('commands/' + agent, command);
+      }
+    }
   }
 
   void _publishMessage(String topic, String message) {
-    _manager.publish(topic, message);
+    _mqttManager.publish(topic, message);
     _messageTextController.clear();
   }
 
@@ -242,6 +182,119 @@ class _ControlPageState extends State<ControlPage> {
           ],
         );
       },
+    );
+  }
+}
+
+class AgentInfoCard extends StatefulWidget {
+  const AgentInfoCard({Key? key, required this.agentState}) : super(key: key);
+  final AgentState agentState; //maybe shouldnt be final
+
+  @override
+  AgentInfoCardState createState() => AgentInfoCardState();
+}
+
+class AgentInfoCardState extends State<AgentInfoCard> {
+  String _buttonText = 'SELECT';
+  bool _selected = false;
+
+  toggleSelected() {
+    if (_buttonText == 'SELECT') {
+      setState(() {
+        _selected = true;
+        _buttonText = 'UNSELECT';
+        serviceLocator<SwarmManager>()
+            .addSelected(widget.agentState.getAgentID);
+      });
+    } else {
+      _selected = false;
+      _buttonText = 'SELECT';
+      serviceLocator<SwarmManager>()
+          .removeSelected(widget.agentState.getAgentID);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 150.0,
+      //height: 300.0,
+      child: Card(
+        shape: _selected
+            ? RoundedRectangleBorder(
+                side: const BorderSide(color: Colors.blue, width: 2.0),
+                borderRadius: BorderRadius.circular(4.0))
+            : RoundedRectangleBorder(
+                side: const BorderSide(color: Colors.white, width: 2.0),
+                borderRadius: BorderRadius.circular(4.0)),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            ListTile(
+              //dense: true,
+              //leading: Icon(Icons.airplanemode_active),
+              title: Text(widget.agentState.getAgentID),
+              subtitle: Text(widget.agentState.getConnectionStatus),
+            ),
+            const Divider(
+              height: 0,
+              thickness: 2,
+              indent: 5,
+              endIndent: 5,
+              color: Colors.grey,
+            ),
+            //const SizedBox(width: 8),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(5.0),
+                  alignment: Alignment.topLeft,
+                  child: Row(
+                    children: [
+                      const Icon(Icons.battery_full_sharp),
+                      Text(widget.agentState.getBatteryLevel.toString() + '%'),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.all(5.0),
+                  alignment: Alignment.topLeft,
+                  child: Row(
+                    children: [
+                      const Icon(Icons.wifi),
+                      Text(widget.agentState.getWifiStrength.toString() + 'dB'),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                const Icon(Icons.airplanemode_active),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Container(
+                        color: Colors.green,
+                        child: Center(
+                          child: Text(widget.agentState.getFlightMode),
+                        )),
+                  ),
+                ),
+              ],
+            ),
+            Align(
+              alignment: Alignment.bottomRight,
+              child: TextButton(
+                child: Text(_buttonText),
+                onPressed: () {
+                  toggleSelected();
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

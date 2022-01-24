@@ -110,6 +110,10 @@ class MQTTManager extends ChangeNotifier {
   void onConnected() {
     _currentState.setAppConnectionState(MQTTAppConnectionState.connected);
     updateState();
+
+    // so that agents can be detected
+    subscribeTo('detection');
+
     print('EXAMPLE::Mosquitto client connected....');
     _client!.updates!.listen((List<MqttReceivedMessage<MqttMessage>> c) {
       final MqttPublishMessage recMess = c[0].payload as MqttPublishMessage;
