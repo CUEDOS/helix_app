@@ -8,8 +8,9 @@ import 'package:helixio_app/modules/core/models/mqtt_app_state.dart';
 import 'package:helixio_app/modules/core/models/agent_state.dart';
 import 'package:helixio_app/modules/core/widgets/status_bar.dart';
 import 'package:helixio_app/modules/helpers/status_info_message_utils.dart';
-import 'package:helixio_app/modules/helpers/agent_command_utils.dart';
+//import 'package:helixio_app/modules/helpers/agent_command_utils.dart';
 import 'package:helixio_app/pages/page_scaffold.dart';
+import 'package:helixio_app/pages/map_page.dart';
 
 class ControlPage extends StatefulWidget {
   const ControlPage({Key? key}) : super(key: key);
@@ -20,26 +21,26 @@ class ControlPage extends StatefulWidget {
 
 class _ControlPageState extends State<ControlPage> {
   String _dropdownValue = 'Simple Flocking';
-  final TextEditingController _messageTextController = TextEditingController();
-  final TextEditingController _topicTextController = TextEditingController();
-  final _controller = ScrollController();
+  //final TextEditingController _messageTextController = TextEditingController();
+  //final TextEditingController _topicTextController = TextEditingController();
+  //final _controller = ScrollController();
 
   late MQTTManager _mqttManager;
 
-  @override
-  void dispose() {
-    _messageTextController.dispose();
-    _topicTextController.dispose();
-    _controller.dispose();
-    super.dispose();
-  }
+  //@override
+  //void dispose() {
+  //_messageTextController.dispose();
+  //_topicTextController.dispose();
+  //_controller.dispose();
+  //super.dispose();
+  //}
 
   @override
   Widget build(BuildContext context) {
     _mqttManager = Provider.of<MQTTManager>(context);
-    if (_controller.hasClients) {
-      _controller.jumpTo(_controller.position.maxScrollExtent);
-    }
+    // if (_controller.hasClients) {
+    //   _controller.jumpTo(_controller.position.maxScrollExtent);
+    // }
 
     return PageScaffold(title: 'Control', body: _buildColumn(_mqttManager));
   }
@@ -101,6 +102,7 @@ class _ControlPageState extends State<ControlPage> {
               ],
             ),
           ),
+          Container(height: 300.0, child: const MyMap()),
           Align(
             alignment: Alignment.topLeft,
             child: Consumer<SwarmManager>(
@@ -161,34 +163,13 @@ class _ControlPageState extends State<ControlPage> {
 
   void _publishMessage(String topic, String message) {
     _mqttManager.publish(topic, message);
-    _messageTextController.clear();
-  }
-
-  void _showDialog(String message) {
-    // flutter defined function
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Error"),
-          content: Text(message),
-          actions: <Widget>[
-            TextButton(
-              child: const Text("Close"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
+    //_messageTextController.clear();
   }
 }
 
 class AgentInfoCard extends StatefulWidget {
   const AgentInfoCard({Key? key, required this.agentState}) : super(key: key);
-  final AgentState agentState; //maybe shouldnt be final
+  final AgentState agentState;
 
   @override
   AgentInfoCardState createState() => AgentInfoCardState();
