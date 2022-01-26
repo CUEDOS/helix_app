@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/foundation.dart';
 
 import 'package:helixio_app/pages/control_page.dart';
 import 'package:helixio_app/pages/swarm_setup_page.dart';
@@ -11,14 +12,21 @@ import 'package:helixio_app/pages/mqtt_settings_page.dart';
 final _availablePages = <String, WidgetBuilder>{
   'Control': (_) => const ControlPage(),
   'Swarm Setup': (_) => const SwarmSetupPage(),
-  'SITL Setup': (_) => const SITLSetupPage(),
   'MQTT Console': (_) => const MQTTConsolePage(),
   'MQTT Settings': (_) => const SettingsScreen(),
 };
 
+void _checkPlatform() {
+  // Adding SITL Setup to the menu only on linux
+  if (defaultTargetPlatform == TargetPlatform.linux) {
+    _availablePages['SITL Setup'] = (_) => const SITLSetupPage();
+  }
+}
+
 // make this a `StateProvider` so we can change its value
 final selectedPageNameProvider = StateProvider<String>((ref) {
   // default value
+  _checkPlatform();
   return _availablePages.keys.first;
 });
 
