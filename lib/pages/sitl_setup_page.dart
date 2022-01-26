@@ -3,33 +3,6 @@ import 'dart:io';
 
 import 'package:helixio_app/pages/page_scaffold.dart';
 
-// class SITLSetupPage extends StatelessWidget {
-//   const SITLSetupPage({Key? key}) : super(key: key);
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return PageScaffold(
-//       title: 'SITL Setup',
-//       body: Center(
-//           child:
-//               //Text('SITL Setup', style: Theme.of(context).textTheme.headline4),
-//               ElevatedButton(
-//         onPressed: () {
-//           _launchSim();
-//         },
-//         child: const Text('Launch Simulation'),
-//       )),
-//     );
-//   }
-
-//   void _launchSim() {
-//     //Process.run('ls', ['l']);
-//     Process.run(
-//         'bash', ['gazebo_sitl_multiple_run.sh', '-n', '3', '-w', 'hough_end'],
-//         workingDirectory: '/home/r32401vc/CASCADE/Firmware/Tools');
-//   }
-// }
-
 class SITLSetupPage extends StatefulWidget {
   const SITLSetupPage({Key? key}) : super(key: key);
 
@@ -118,9 +91,16 @@ class _SwarmSizeSliderState extends State<SwarmSizeSlider> {
   void _handleConfirmPress() {
     Process.run(
       'bash',
-      ['gazebo_sitl_multiple_run.sh', '-n', '3', '-w', 'hough_end'],
+      ['gazebo_sitl_multiple_no_server.sh', '-n', '3', '-w', 'hough_end'],
       workingDirectory: '/home/r32401vc/CASCADE/Firmware/Tools',
       runInShell: true,
     );
+
+    // Process.start(
+    //   'gzserver',
+    //   ['--verbose'],
+    //   workingDirectory: '/home/r32401vc/CASCADE/Firmware/Tools',
+    //   runInShell: true,
+    // );
   }
 }
