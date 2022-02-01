@@ -45,7 +45,7 @@ class _ControlPageState extends State<ControlPage> {
     return PageScaffold(title: 'Control', body: _buildColumn(_mqttManager));
   }
 
-  Widget _buildColumn(MQTTManager manager) {
+  Widget _buildColumn(MQTTManager mqttManager) {
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
       primary: false,
@@ -53,21 +53,31 @@ class _ControlPageState extends State<ControlPage> {
         children: <Widget>[
           StatusBar(
               statusMessage: prepareMQTTStateMessageFrom(
-                  manager.currentState.getAppConnectionState)),
+                  mqttManager.currentState.getAppConnectionState)),
           Align(
             alignment: Alignment.topLeft,
             child: Wrap(
               children: [
                 _buildControlButton(
-                    manager.currentState.getAppConnectionState, 'Arm', 'arm'),
-                _buildControlButton(manager.currentState.getAppConnectionState,
-                    'Takeoff', 'takeoff'),
+                    mqttManager.currentState.getAppConnectionState,
+                    'Arm',
+                    'arm'),
                 _buildControlButton(
-                    manager.currentState.getAppConnectionState, 'Hold', 'hold'),
-                _buildControlButton(manager.currentState.getAppConnectionState,
-                    'Return', 'return'),
+                    mqttManager.currentState.getAppConnectionState,
+                    'Takeoff',
+                    'takeoff'),
                 _buildControlButton(
-                    manager.currentState.getAppConnectionState, 'Land', 'land'),
+                    mqttManager.currentState.getAppConnectionState,
+                    'Hold',
+                    'hold'),
+                _buildControlButton(
+                    mqttManager.currentState.getAppConnectionState,
+                    'Return',
+                    'return'),
+                _buildControlButton(
+                    mqttManager.currentState.getAppConnectionState,
+                    'Land',
+                    'land'),
               ],
             ),
           ),
@@ -97,12 +107,20 @@ class _ControlPageState extends State<ControlPage> {
                     });
                   },
                 ),
-                _buildControlButton(manager.currentState.getAppConnectionState,
-                    'Start', _dropdownValue),
+                _buildControlButton(
+                    mqttManager.currentState.getAppConnectionState,
+                    'Start',
+                    _dropdownValue),
               ],
             ),
           ),
-          Container(height: 300.0, child: const MyMap()),
+          Consumer<SwarmManager>(builder: (context, swarmManager, child) {
+            return Container(
+                height: 300.0,
+                child: MyMap(
+                  swarmManager: swarmManager,
+                ));
+          }),
           Align(
             alignment: Alignment.topLeft,
             child: Consumer<SwarmManager>(

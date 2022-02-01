@@ -1,26 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:helixio_app/pages/page_scaffold.dart';
+//import 'package:helixio_app/pages/page_scaffold.dart';
+import 'package:helixio_app/modules/core/models/agent_state.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/gestures.dart';
 import 'package:latlng/latlng.dart';
 import 'package:map/map.dart';
+import 'package:helixio_app/modules/core/managers/swarm_manager.dart';
+import 'dart:math' as math;
 
-class MapPage extends StatelessWidget {
-  const MapPage({Key? key}) : super(key: key);
+// class MapPage extends StatelessWidget {
+//   const MapPage({Key? key}) : super(key: key);
 
-  @override
-  Widget build(BuildContext context) {
-    return const PageScaffold(
-      title: 'SITL Setup',
-      body: Center(
-        child: MyMap(),
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return const PageScaffold(
+//       title: 'SITL Setup',
+//       body: Center(
+//         child: MyMap(),
+//       ),
+//     );
+//   }
+// }
 
 class MyMap extends StatefulWidget {
-  const MyMap({Key? key}) : super(key: key);
+  const MyMap({Key? key, required this.swarmManager}) : super(key: key);
+  final SwarmManager swarmManager;
 
   @override
   _MyMapState createState() => _MyMapState();
@@ -33,15 +37,29 @@ class _MyMapState extends State<MyMap> {
 
   bool _darkMode = false;
 
-  final markers = [
-    LatLng(53, -2),
-    // LatLng(35.676, 51.41),
-    // LatLng(35.678, 51.41),
-    // LatLng(35.68, 51.41),
-    // LatLng(35.682, 51.41),
-    // LatLng(35.684, 51.41),
-    // LatLng(35.686, 51.41),
-  ];
+  List<LatLng> _generateMarkers(SwarmManager swarmManager) {
+    List<LatLng> markers = [];
+
+    if (swarmManager.swarm.isNotEmpty) {
+      Iterable<AgentState> agents = swarmManager.swarm.values;
+      for (AgentState agent in agents) {
+        markers.add(agent.getLatLng);
+      }
+    } else {
+      //markers.add(LatLng(53.43578053111544, -2.250343561172483));
+    }
+    return markers;
+  }
+
+  // final markers = [
+  //   LatLng(53, -2),
+  //   // LatLng(35.676, 51.41),
+  //   // LatLng(35.678, 51.41),
+  //   // LatLng(35.68, 51.41),
+  //   // LatLng(35.682, 51.41),
+  //   // LatLng(35.684, 51.41),
+  //   // LatLng(35.686, 51.41),
+  // ];
 
   void _gotoDefault() {
     controller.center = LatLng(53.43578053111544, -2.250343561172483);
@@ -85,6 +103,12 @@ class _MyMapState extends State<MyMap> {
       top: pos.dy - 16,
       width: 24,
       height: 24,
+      // child: Row(
+      //   children: [
+      //     const Text('SXXX'),
+      //     Icon(Icons.airplanemode_active, color: color),
+      //   ],
+      // ),
       child: Icon(Icons.airplanemode_active, color: color),
     );
   }
@@ -94,17 +118,18 @@ class _MyMapState extends State<MyMap> {
     return MapLayoutBuilder(
       controller: controller,
       builder: (context, transformer) {
-        final markerPositions =
-            markers.map(transformer.fromLatLngToXYCoords).toList();
+        final markerPositions = _generateMarkers(widget.swarmManager)
+            .map(transformer.fromLatLngToXYCoords)
+            .toList();
 
         final markerWidgets = markerPositions.map(
           (pos) => _buildMarkerWidget(pos, Colors.red),
         );
 
-        final homeLocation = transformer.fromLatLngToXYCoords(
-            LatLng(53.43578053111544, -2.250343561172483));
+        // final homeLocation = transformer.fromLatLngToXYCoords(
+        //     LatLng(53.43578053111544, -2.250343561172483));
 
-        final homeMarkerWidget = _buildMarkerWidget(homeLocation, Colors.black);
+        //final homeMarkerWidget = _buildMarkerWidget(homeLocation, Colors.black);
 
         final centerLocation = Offset(transformer.constraints.biggest.width / 2,
             transformer.constraints.biggest.height / 2);
@@ -160,7 +185,7 @@ class _MyMapState extends State<MyMap> {
                     );
                   },
                 ),
-                homeMarkerWidget,
+                //homeMarkerWidget,
                 ...markerWidgets,
                 //centerMarkerWidget,
               ],
