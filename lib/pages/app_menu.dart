@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 
 import 'package:helixio_app/pages/control_page.dart';
 import 'package:helixio_app/pages/swarm_setup_page.dart';
+import 'package:helixio_app/pages/map_page.dart';
 import 'package:helixio_app/pages/sitl_setup_page.dart';
 import 'package:helixio_app/pages/mqtt_console_page.dart';
 import 'package:helixio_app/pages/mqtt_settings_page.dart';
@@ -11,6 +12,7 @@ import 'package:helixio_app/pages/mqtt_settings_page.dart';
 // a map of ("page name", WidgetBuilder) pairs
 final _availablePages = <String, WidgetBuilder>{
   'Control': (_) => const ControlPage(),
+  //'Map Page': (_) => const MapPage(),
   'Swarm Setup': (_) => const SwarmSetupPage(),
   'MQTT Console': (_) => const MQTTConsolePage(),
   'MQTT Settings': (_) => const SettingsScreen(),

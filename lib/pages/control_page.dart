@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:helixio_app/modules/core/managers/swarm_manager.dart';
 import 'package:helixio_app/modules/helpers/service_locator.dart';
 import 'package:provider/provider.dart';
+import 'dart:io';
 
 import 'package:helixio_app/modules/core/managers/mqtt_manager.dart';
 import 'package:helixio_app/modules/core/models/mqtt_app_state.dart';
@@ -10,6 +11,8 @@ import 'package:helixio_app/modules/core/widgets/status_bar.dart';
 import 'package:helixio_app/modules/helpers/status_info_message_utils.dart';
 //import 'package:helixio_app/modules/helpers/agent_command_utils.dart';
 import 'package:helixio_app/pages/page_scaffold.dart';
+import 'package:helixio_app/pages/map_page.dart';
+import 'package:helixio_app/modules/helpers/ground_tools.dart';
 
 class ControlPage extends StatefulWidget {
   const ControlPage({Key? key}) : super(key: key);
@@ -20,31 +23,31 @@ class ControlPage extends StatefulWidget {
 
 class _ControlPageState extends State<ControlPage> {
   String _dropdownValue = 'Simple Flocking';
-  final TextEditingController _messageTextController = TextEditingController();
-  final TextEditingController _topicTextController = TextEditingController();
-  final _controller = ScrollController();
+  //final TextEditingController _messageTextController = TextEditingController();
+  //final TextEditingController _topicTextController = TextEditingController();
+  //final _controller = ScrollController();
 
   late MQTTManager _mqttManager;
 
-  @override
-  void dispose() {
-    _messageTextController.dispose();
-    _topicTextController.dispose();
-    _controller.dispose();
-    super.dispose();
-  }
+  //@override
+  //void dispose() {
+  //_messageTextController.dispose();
+  //_topicTextController.dispose();
+  //_controller.dispose();
+  //super.dispose();
+  //}
 
   @override
   Widget build(BuildContext context) {
     _mqttManager = Provider.of<MQTTManager>(context);
-    if (_controller.hasClients) {
-      _controller.jumpTo(_controller.position.maxScrollExtent);
-    }
+    // if (_controller.hasClients) {
+    //   _controller.jumpTo(_controller.position.maxScrollExtent);
+    // }
 
     return PageScaffold(title: 'Control', body: _buildColumn(_mqttManager));
   }
 
-  Widget _buildColumn(MQTTManager manager) {
+  Widget _buildColumn(MQTTManager mqttManager) {
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
       primary: false,
@@ -52,21 +55,31 @@ class _ControlPageState extends State<ControlPage> {
         children: <Widget>[
           StatusBar(
               statusMessage: prepareMQTTStateMessageFrom(
-                  manager.currentState.getAppConnectionState)),
+                  mqttManager.currentState.getAppConnectionState)),
           Align(
             alignment: Alignment.topLeft,
             child: Wrap(
               children: [
                 _buildControlButton(
-                    manager.currentState.getAppConnectionState, 'Arm', 'arm'),
-                _buildControlButton(manager.currentState.getAppConnectionState,
-                    'Takeoff', 'takeoff'),
+                    mqttManager.currentState.getAppConnectionState,
+                    'Arm',
+                    'arm'),
                 _buildControlButton(
-                    manager.currentState.getAppConnectionState, 'Hold', 'hold'),
-                _buildControlButton(manager.currentState.getAppConnectionState,
-                    'Return', 'return'),
+                    mqttManager.currentState.getAppConnectionState,
+                    'Takeoff',
+                    'takeoff'),
                 _buildControlButton(
-                    manager.currentState.getAppConnectionState, 'Land', 'land'),
+                    mqttManager.currentState.getAppConnectionState,
+                    'Hold',
+                    'hold'),
+                _buildControlButton(
+                    mqttManager.currentState.getAppConnectionState,
+                    'Return',
+                    'return'),
+                _buildControlButton(
+                    mqttManager.currentState.getAppConnectionState,
+                    'Land',
+                    'land'),
               ],
             ),
           ),
@@ -96,11 +109,20 @@ class _ControlPageState extends State<ControlPage> {
                     });
                   },
                 ),
-                _buildControlButton(manager.currentState.getAppConnectionState,
-                    'Start', _dropdownValue),
+                _buildControlButton(
+                    mqttManager.currentState.getAppConnectionState,
+                    'Start',
+                    _dropdownValue),
               ],
             ),
           ),
+          Consumer<SwarmManager>(builder: (context, swarmManager, child) {
+            return Container(
+                height: 300.0,
+                child: MyMap(
+                  swarmManager: swarmManager,
+                ));
+          }),
           Align(
             alignment: Alignment.topLeft,
             child: Consumer<SwarmManager>(
@@ -147,9 +169,19 @@ class _ControlPageState extends State<ControlPage> {
   }
 
   void _handleControlPress(String command) {
+    var swarm = serviceLocator<SwarmManager>().swarm;
     List<String> selected = serviceLocator<SwarmManager>().selected;
-    if (selected.isEmpty) {
-      for (String agent in serviceLocator<SwarmManager>().swarm.keys) {
+    if (command == 'return') {
+      var sortedSwarmALtitudes = altCalc(swarm,
+          31); //31 is altitude of hough end, change with function to get site elevation in future
+      for (String agent in swarm.keys) {
+        _publishMessage(
+            agent + '/home/altitude', sortedSwarmALtitudes[agent].toString());
+        //sleep(const Duration(seconds: 1));
+        _publishMessage('commands/' + agent, command);
+      }
+    } else if (selected.isEmpty) {
+      for (String agent in swarm.keys) {
         _publishMessage('commands/' + agent, command);
       }
     } else {
@@ -161,34 +193,13 @@ class _ControlPageState extends State<ControlPage> {
 
   void _publishMessage(String topic, String message) {
     _mqttManager.publish(topic, message);
-    _messageTextController.clear();
-  }
-
-  void _showDialog(String message) {
-    // flutter defined function
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Error"),
-          content: Text(message),
-          actions: <Widget>[
-            TextButton(
-              child: const Text("Close"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
+    //_messageTextController.clear();
   }
 }
 
 class AgentInfoCard extends StatefulWidget {
   const AgentInfoCard({Key? key, required this.agentState}) : super(key: key);
-  final AgentState agentState; //maybe shouldnt be final
+  final AgentState agentState;
 
   @override
   AgentInfoCardState createState() => AgentInfoCardState();

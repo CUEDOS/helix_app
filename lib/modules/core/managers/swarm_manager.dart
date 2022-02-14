@@ -1,5 +1,6 @@
 //import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
+import 'package:latlng/latlng.dart';
 
 import 'package:helixio_app/modules/core/managers/mqtt_manager.dart';
 import '../models/agent_state.dart';
@@ -38,6 +39,18 @@ class SwarmManager extends ChangeNotifier {
     }
   }
 
+  List<double> decodeTelemetry(String telemetry) {
+    //converts strings to doubles
+    var stringArray = telemetry.split(', ');
+
+    List<double> doubleArray = [];
+    for (int i = 0; i < stringArray.length; i++) {
+      doubleArray.add(double.parse(stringArray[i]));
+    }
+
+    return doubleArray;
+  }
+
   void handleMessage(String topic, String payload) {
     var topicArray = topic.split('/');
     // check if the message is on the detection topic
@@ -61,8 +74,23 @@ class SwarmManager extends ChangeNotifier {
         case 'wifi_strength':
           swarm[id]?.setWifiStrength(int.parse(payload));
           break;
+        case 'telemetry':
+          switch (topicArray[2]) {
+            case 'geodetic':
+              // geodetic message needs to be decoded
+              var geodeticTelem = decodeTelemetry(payload);
+              swarm[id]?.setGeodetic(
+                  LatLng(geodeticTelem[0], geodeticTelem[1]), geodeticTelem[2]);
+              break;
+            case 'heading':
+              swarm[id]?.setHeading(double.parse(payload));
+              break;
+            case 'position_ned':
+              // position message needs to be decoded
+              break;
+          }
       }
+      notifyListeners();
     }
-    notifyListeners();
   }
 }

@@ -29,6 +29,7 @@ class MQTTManager extends ChangeNotifier {
     _client = MqttServerClient(_host!, _identifier);
     _client!.port = 1883;
     _client!.keepAlivePeriod = 20;
+    _client!.autoReconnect = true; // added to make connection more stable
     _client!.onDisconnected = onDisconnected;
     _client!.secure = false;
     _client!.logging(on: true);
