@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:helixio_app/modules/core/managers/swarm_manager.dart';
 import 'package:helixio_app/modules/helpers/service_locator.dart';
 import 'package:provider/provider.dart';
+import 'dart:io';
 
 import 'package:helixio_app/modules/core/managers/mqtt_manager.dart';
 import 'package:helixio_app/modules/core/models/mqtt_app_state.dart';
@@ -11,6 +12,7 @@ import 'package:helixio_app/modules/helpers/status_info_message_utils.dart';
 //import 'package:helixio_app/modules/helpers/agent_command_utils.dart';
 import 'package:helixio_app/pages/page_scaffold.dart';
 import 'package:helixio_app/pages/map_page.dart';
+import 'package:helixio_app/modules/helpers/ground_tools.dart';
 
 class ControlPage extends StatefulWidget {
   const ControlPage({Key? key}) : super(key: key);
@@ -167,9 +169,19 @@ class _ControlPageState extends State<ControlPage> {
   }
 
   void _handleControlPress(String command) {
+    var swarm = serviceLocator<SwarmManager>().swarm;
     List<String> selected = serviceLocator<SwarmManager>().selected;
-    if (selected.isEmpty) {
-      for (String agent in serviceLocator<SwarmManager>().swarm.keys) {
+    if (command == 'return') {
+      var sortedSwarmALtitudes = altCalc(swarm,
+          31); //31 is altitude of hough end, change with function to get site elevation in future
+      for (String agent in swarm.keys) {
+        _publishMessage(
+            agent + '/home/altitude', sortedSwarmALtitudes[agent].toString());
+        //sleep(const Duration(seconds: 1));
+        _publishMessage('commands/' + agent, command);
+      }
+    } else if (selected.isEmpty) {
+      for (String agent in swarm.keys) {
         _publishMessage('commands/' + agent, command);
       }
     } else {

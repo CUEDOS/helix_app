@@ -37,29 +37,33 @@ class _MyMapState extends State<MyMap> {
 
   bool _darkMode = false;
 
-  List<LatLng> _generateMarkers(SwarmManager swarmManager) {
-    List<LatLng> markers = [];
+  // List<LatLng> _generateMarkers(SwarmManager swarmManager) {
+  //   List<LatLng> markers = [];
+
+  //   if (swarmManager.swarm.isNotEmpty) {
+  //     Iterable<AgentState> agents = swarmManager.swarm.values;
+  //     for (AgentState agent in agents) {
+  //       markers.add(agent.getLatLng);
+  //     }
+  //   } else {
+  //     //markers.add(LatLng(53.43578053111544, -2.250343561172483));
+  //   }
+  //   return markers;
+  // }
+
+  List<AgentMarker> _generateMarkers(
+      SwarmManager swarmManager, MapTransformer transformer) {
+    List<AgentMarker> agentMarkers = [];
 
     if (swarmManager.swarm.isNotEmpty) {
       Iterable<AgentState> agents = swarmManager.swarm.values;
       for (AgentState agent in agents) {
-        markers.add(agent.getLatLng);
+        agentMarkers.add(AgentMarker(agent.getLatLng, agent.getHeading,
+            transformer.fromLatLngToXYCoords(agent.getLatLng)));
       }
-    } else {
-      //markers.add(LatLng(53.43578053111544, -2.250343561172483));
     }
-    return markers;
+    return agentMarkers;
   }
-
-  // final markers = [
-  //   LatLng(53, -2),
-  //   // LatLng(35.676, 51.41),
-  //   // LatLng(35.678, 51.41),
-  //   // LatLng(35.68, 51.41),
-  //   // LatLng(35.682, 51.41),
-  //   // LatLng(35.684, 51.41),
-  //   // LatLng(35.686, 51.41),
-  // ];
 
   void _gotoDefault() {
     controller.center = LatLng(53.43578053111544, -2.250343561172483);
@@ -97,7 +101,7 @@ class _MyMapState extends State<MyMap> {
     }
   }
 
-  Widget _buildMarkerWidget(Offset pos, Color color) {
+  Widget _buildMarkerWidget(Offset pos, double heading, Color color) {
     return Positioned(
       left: pos.dx - 16,
       top: pos.dy - 16,
@@ -109,7 +113,10 @@ class _MyMapState extends State<MyMap> {
       //     Icon(Icons.airplanemode_active, color: color),
       //   ],
       // ),
-      child: Icon(Icons.airplanemode_active, color: color),
+      child: Transform.rotate(
+          //convert heading in degrees to radians
+          angle: heading * (math.pi / 180),
+          child: Icon(Icons.airplanemode_active, color: color)),
     );
   }
 
@@ -118,12 +125,17 @@ class _MyMapState extends State<MyMap> {
     return MapLayoutBuilder(
       controller: controller,
       builder: (context, transformer) {
-        final markerPositions = _generateMarkers(widget.swarmManager)
-            .map(transformer.fromLatLngToXYCoords)
-            .toList();
+        // final markerPositions = _generateMarkers(widget.swarmManager)
+        //     .map((agentMarker) =>
+        //         transformer.fromLatLngToXYCoords(agentMarker.getLatLng))
+        //     .toList();
+
+        final markerPositions =
+            _generateMarkers(widget.swarmManager, transformer);
 
         final markerWidgets = markerPositions.map(
-          (pos) => _buildMarkerWidget(pos, Colors.red),
+          (agentMarker) => _buildMarkerWidget(
+              agentMarker.cartesian, agentMarker.heading, Colors.red),
         );
 
         // final homeLocation = transformer.fromLatLngToXYCoords(
@@ -200,4 +212,17 @@ class _MyMapState extends State<MyMap> {
     //   child: const Icon(Icons.my_location),
     //),
   }
+}
+
+// Defines marker object containing position and heading
+class AgentMarker {
+  final LatLng latLng;
+  final double heading;
+  final Offset cartesian;
+
+  AgentMarker(this.latLng, this.heading, this.cartesian);
+
+  // LatLng get getLatLng => _latLng;
+  // double get getHeading => _heading;
+  // Offset get getCartesian => _cartesian;
 }

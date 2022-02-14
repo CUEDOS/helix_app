@@ -65,6 +65,7 @@ class AgentState {
   int get getWifiStrength => _wifiStrength;
   String get getFlightMode => _flightMode;
   LatLng get getLatLng => _latLng;
+  double get getabsoluteAltitude => _absoluteAltitude;
   double get getHeading => _heading;
   agentCommand get getCurrentCommand => _currentCommand;
 }
