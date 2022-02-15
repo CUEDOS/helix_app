@@ -47,7 +47,7 @@ class MQTTManager extends ChangeNotifier {
         .startClean() // Non persistent session for testing
         //.authenticateAs(username, password)// Non persistent session for testing
         .withWillQos(MqttQos.atLeastOnce);
-    print('EXAMPLE::Mosquitto client connecting....');
+    //print('EXAMPLE::Mosquitto client connecting....');
     _client!.connectionMessage = connMess;
   }
 
@@ -57,12 +57,12 @@ class MQTTManager extends ChangeNotifier {
   void connect() async {
     assert(_client != null);
     try {
-      print('EXAMPLE::Mosquitto start client connecting....');
+      //print('EXAMPLE::Mosquitto start client connecting....');
       _currentState.setAppConnectionState(MQTTAppConnectionState.connecting);
       updateState();
       await _client!.connect();
     } on Exception catch (e) {
-      print('EXAMPLE::client exception - $e');
+      //print('EXAMPLE::client exception - $e');
       disconnect();
     }
   }
@@ -81,14 +81,14 @@ class MQTTManager extends ChangeNotifier {
 
   /// The subscribed callback
   void onSubscribed(String topic) {
-    print('EXAMPLE::Subscription confirmed for topic $topic');
+    //print('EXAMPLE::Subscription confirmed for topic $topic');
     _currentState
         .setAppConnectionState(MQTTAppConnectionState.connectedSubscribed);
     updateState();
   }
 
   void onUnsubscribed(String? topic) {
-    print('EXAMPLE::onUnsubscribed confirmed for topic $topic');
+    //print('EXAMPLE::onUnsubscribed confirmed for topic $topic');
     _currentState.clearText();
     _currentState
         .setAppConnectionState(MQTTAppConnectionState.connectedUnSubscribed);
@@ -97,10 +97,10 @@ class MQTTManager extends ChangeNotifier {
 
   /// The unsolicited disconnect callback
   void onDisconnected() {
-    print('EXAMPLE::OnDisconnected client callback - Client disconnection');
+    //print('EXAMPLE::OnDisconnected client callback - Client disconnection');
     if (_client!.connectionStatus!.returnCode ==
         MqttConnectReturnCode.noneSpecified) {
-      print('EXAMPLE::OnDisconnected callback is solicited, this is correct');
+      //print('EXAMPLE::OnDisconnected callback is solicited, this is correct');
     }
     _currentState.clearText();
     _currentState.setAppConnectionState(MQTTAppConnectionState.disconnected);
@@ -115,20 +115,20 @@ class MQTTManager extends ChangeNotifier {
     // so that agents can be detected
     subscribeTo('detection');
 
-    print('EXAMPLE::Mosquitto client connected....');
+    //print('EXAMPLE::Mosquitto client connected....');
     _client!.updates!.listen((List<MqttReceivedMessage<MqttMessage>> c) {
       final MqttPublishMessage recMess = c[0].payload as MqttPublishMessage;
       final String payload =
           MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
-      _currentState.setReceivedText(payload);
-      updateState();
+      //_currentState.setReceivedText(payload);
+      //updateState();
       serviceLocator<SwarmManager>().handleMessage(c[0].topic, payload);
-      print(
-          'EXAMPLE::Change notification:: topic is <${c[0].topic}>, payload is <-- $payload -->');
-      print('');
+      //print(
+      // 'EXAMPLE::Change notification:: topic is <${c[0].topic}>, payload is <-- $payload -->');
+      //print('');
     });
-    print(
-        'EXAMPLE::OnConnected client callback - Client connection was sucessful');
+    //print(
+    //'EXAMPLE::OnConnected client callback - Client connection was sucessful');
   }
 
   void subscribeTo(String topic) {
