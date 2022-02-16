@@ -27,7 +27,7 @@ class _ControlPageState extends State<ControlPage> {
   //final TextEditingController _topicTextController = TextEditingController();
   //final _controller = ScrollController();
 
-  late MQTTManager _mqttManager;
+  //late MQTTManager _mqttManager;
 
   //@override
   //void dispose() {
@@ -39,94 +39,94 @@ class _ControlPageState extends State<ControlPage> {
 
   @override
   Widget build(BuildContext context) {
-    _mqttManager = Provider.of<MQTTManager>(context);
+    //_mqttManager = Provider.of<MQTTManager>(context);
     // if (_controller.hasClients) {
     //   _controller.jumpTo(_controller.position.maxScrollExtent);
     // }
 
-    return PageScaffold(title: 'Control', body: _buildColumn(_mqttManager));
+    return PageScaffold(title: 'Control', body: _buildColumn());
   }
 
-  Widget _buildColumn(MQTTManager mqttManager) {
+  Widget _buildColumn() {
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
       primary: false,
       child: Column(
         children: <Widget>[
-          StatusBar(
-              statusMessage: prepareMQTTStateMessageFrom(
-                  mqttManager.currentState.getAppConnectionState)),
-          Align(
-            alignment: Alignment.topLeft,
-            child: Wrap(
+          Consumer<MQTTManager>(builder: (context, mqttManager, _) {
+            return Column(
               children: [
-                _buildControlButton(
-                    mqttManager.currentState.getAppConnectionState,
-                    'Arm',
-                    'arm'),
-                _buildControlButton(
-                    mqttManager.currentState.getAppConnectionState,
-                    'Takeoff',
-                    'takeoff'),
-                _buildControlButton(
-                    mqttManager.currentState.getAppConnectionState,
-                    'Hold',
-                    'hold'),
-                _buildControlButton(
-                    mqttManager.currentState.getAppConnectionState,
-                    'Return',
-                    'return'),
-                _buildControlButton(
-                    mqttManager.currentState.getAppConnectionState,
-                    'Land',
-                    'land'),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                DropdownButton<String>(
-                  value: _dropdownValue,
-                  icon: const Icon(Icons.airplanemode_active),
-                  hint: const Text('Select Command'),
-                  items: <String>[
-                    'Simple Flocking',
-                    'Circle Helix',
-                    'Racetrack Helix',
-                    'Figure 8',
-                    'Double Racetrack'
-                  ].map((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      _dropdownValue = newValue!;
-                    });
-                  },
+                StatusBar(
+                    statusMessage: prepareMQTTStateMessageFrom(
+                        mqttManager.currentState.getAppConnectionState)),
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: Wrap(
+                    children: [
+                      _buildControlButton(
+                          mqttManager.currentState.getAppConnectionState,
+                          'Arm',
+                          'arm'),
+                      _buildControlButton(
+                          mqttManager.currentState.getAppConnectionState,
+                          'Takeoff',
+                          'takeoff'),
+                      _buildControlButton(
+                          mqttManager.currentState.getAppConnectionState,
+                          'Hold',
+                          'hold'),
+                      _buildControlButton(
+                          mqttManager.currentState.getAppConnectionState,
+                          'Return',
+                          'return'),
+                      _buildControlButton(
+                          mqttManager.currentState.getAppConnectionState,
+                          'Land',
+                          'land'),
+                    ],
+                  ),
                 ),
-                _buildControlButton(
-                    mqttManager.currentState.getAppConnectionState,
-                    'Start',
-                    _dropdownValue),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    children: [
+                      DropdownButton<String>(
+                        value: _dropdownValue,
+                        icon: const Icon(Icons.airplanemode_active),
+                        hint: const Text('Select Command'),
+                        items: <String>[
+                          'Simple Flocking',
+                          'Circle Helix',
+                          'Racetrack Helix',
+                          'Figure 8',
+                          'Double Racetrack'
+                        ].map((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        }).toList(),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            _dropdownValue = newValue!;
+                          });
+                        },
+                      ),
+                      _buildControlButton(
+                          mqttManager.currentState.getAppConnectionState,
+                          'Start',
+                          _dropdownValue),
+                    ],
+                  ),
+                ),
               ],
-            ),
-          ),
-          Consumer<SwarmManager>(builder: (context, swarmManager, child) {
-            return Container(
-                height: 300.0,
-                child: MyMap(
-                  swarmManager: swarmManager,
-                ));
+            );
           }),
+          Container(height: 300.0, child: MyMap()),
           Align(
             alignment: Alignment.topLeft,
             child: Consumer<SwarmManager>(
-              builder: (context, swarmManager, child) {
+              builder: (context, swarmManager, _) {
                 return Wrap(
                     //alignment: WrapAlignment.start,
                     children: _buildInfoCardList(swarmManager));
@@ -192,7 +192,7 @@ class _ControlPageState extends State<ControlPage> {
   }
 
   void _publishMessage(String topic, String message) {
-    _mqttManager.publish(topic, message);
+    serviceLocator<MQTTManager>().publish(topic, message);
     //_messageTextController.clear();
   }
 }
