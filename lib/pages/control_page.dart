@@ -96,7 +96,7 @@ class _ControlPageState extends State<ControlPage> {
                         hint: const Text('Select Command'),
                         items: <String>[
                           'Simple Flocking',
-                          'Circle Helix',
+                          'Single Torus',
                           'Racetrack Helix',
                           'Figure 8',
                           'Double Racetrack'
