@@ -9,6 +9,16 @@ enum agentCommand {
   land,
 }
 
+class SwarmingGains {
+  double kMigration;
+  double kLaneCohesion;
+  double kRotation;
+  double kSeperation;
+
+  SwarmingGains(
+      this.kLaneCohesion, this.kMigration, this.kRotation, this.kSeperation);
+}
+
 class AgentState {
   final String _agentID;
   bool _connected = false;
@@ -20,7 +30,7 @@ class AgentState {
   double _heading = 0;
   double _absoluteAltitude = 0;
   agentCommand _currentCommand = agentCommand.none;
-
+  SwarmingGains _swarmingGains = SwarmingGains(0, 0, 0, 0);
   AgentState(this._agentID);
 
   void setConnected(String connectionStatus) {
@@ -58,6 +68,10 @@ class AgentState {
     _heading = heading;
   }
 
+  void setSwarmingGains(SwarmingGains swarmingGains) {
+    _swarmingGains = swarmingGains;
+  }
+
   String get getAgentID => _agentID;
   bool get getConnected => _connected;
   String get getConnectionStatus => _connectionStatus;
@@ -67,5 +81,6 @@ class AgentState {
   LatLng get getLatLng => _latLng;
   double get getabsoluteAltitude => _absoluteAltitude;
   double get getHeading => _heading;
+  SwarmingGains get getSwarmingGains => _swarmingGains;
   agentCommand get getCurrentCommand => _currentCommand;
 }
