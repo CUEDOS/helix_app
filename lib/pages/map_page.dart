@@ -39,20 +39,6 @@ class _MyMapState extends State<MyMap> {
 
   bool _darkMode = false;
 
-  // List<LatLng> _generateMarkers(SwarmManager swarmManager) {
-  //   List<LatLng> markers = [];
-
-  //   if (swarmManager.swarm.isNotEmpty) {
-  //     Iterable<AgentState> agents = swarmManager.swarm.values;
-  //     for (AgentState agent in agents) {
-  //       markers.add(agent.getLatLng);
-  //     }
-  //   } else {
-  //     //markers.add(LatLng(53.43578053111544, -2.250343561172483));
-  //   }
-  //   return markers;
-  // }
-
   List<AgentMarker> _generateMarkers(var swarm, MapTransformer transformer) {
     List<AgentMarker> agentMarkers = [];
 
