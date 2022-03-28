@@ -96,10 +96,7 @@ class _ControlPageState extends State<ControlPage> {
                         hint: const Text('Select Command'),
                         items: <String>[
                           'Simple Flocking',
-                          'Single Torus',
-                          'Racetrack Helix',
-                          'Figure 8',
-                          'Double Racetrack'
+                          'Experiment',
                         ].map((String value) {
                           return DropdownMenuItem<String>(
                             value: value,
