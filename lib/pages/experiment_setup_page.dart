@@ -346,9 +346,6 @@ class _ExperimentSetupEntryState extends State<ExperimentSetupEntry> {
             'corridor_points': corridorPoints
           };
           corridorJson = jsonEncode(corridor);
-          print(corridorJson);
-
-          //corridorPointsJson = jsonEncode(corridorPoints);
         }
         break;
 
@@ -360,7 +357,17 @@ class _ExperimentSetupEntryState extends State<ExperimentSetupEntry> {
 
       case 'Figure 8':
         {
-          //statements;
+          List<List<double>> corridorPoints = figureEight(
+              pointsNumberSliderValue,
+              majorRadiusSliderValue,
+              minorRadiusSliderValue,
+              majorRadiusSliderValue);
+
+          corridor = {
+            'corridor_radius': corridorRadius,
+            'corridor_points': corridorPoints
+          };
+          corridorJson = jsonEncode(corridor);
         }
         break;
       case 'Line':
