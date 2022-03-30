@@ -8,6 +8,7 @@ import 'package:helixio_app/modules/helpers/service_locator.dart';
 
 class SwarmManager extends ChangeNotifier {
   int swarmSize = 0;
+  LatLng _referencePoint = LatLng(53.43578053111544, -2.250343561172483);
   var swarm = <String, AgentState>{}; // linter prefers this to map
   List<String> selected = [];
 
@@ -21,6 +22,10 @@ class SwarmManager extends ChangeNotifier {
       swarm[id] = AgentState(id);
     }
     subscribeToSwarm(mqttManager);
+  }
+
+  void setReferencePoint(LatLng referencePoint) {
+    _referencePoint = referencePoint;
   }
 
   void addSelected(String id) {
@@ -93,4 +98,6 @@ class SwarmManager extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  LatLng get getReferencePoint => _referencePoint;
 }

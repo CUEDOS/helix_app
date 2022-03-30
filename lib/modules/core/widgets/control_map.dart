@@ -10,29 +10,15 @@ import 'package:helixio_app/modules/core/managers/swarm_manager.dart';
 import 'package:timer_builder/timer_builder.dart';
 import 'dart:math' as math;
 
-// class MapPage extends StatelessWidget {
-//   const MapPage({Key? key}) : super(key: key);
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return const PageScaffold(
-//       title: 'SITL Setup',
-//       body: Center(
-//         child: MyMap(),
-//       ),
-//     );
-//   }
-// }
-
-class MyMap extends StatefulWidget {
-  const MyMap({Key? key}) : super(key: key);
+class ControlMap extends StatefulWidget {
+  const ControlMap({Key? key}) : super(key: key);
   //final SwarmManager swarmManager;
 
   @override
-  _MyMapState createState() => _MyMapState();
+  _ControlMapState createState() => _ControlMapState();
 }
 
-class _MyMapState extends State<MyMap> {
+class _ControlMapState extends State<ControlMap> {
   final controller = MapController(
     location: LatLng(53.43578053111544, -2.250343561172483),
   );
@@ -103,7 +89,7 @@ class _MyMapState extends State<MyMap> {
       child: Transform.rotate(
           //convert heading in degrees to radians
           angle: heading * (math.pi / 180),
-          child: Icon(Icons.airplanemode_active, color: color)),
+          child: Icon(Icons.airplanemode_active, color: color, size: 15)),
     );
   }
 

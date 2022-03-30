@@ -11,7 +11,7 @@ import 'package:helixio_app/modules/core/widgets/status_bar.dart';
 import 'package:helixio_app/modules/helpers/status_info_message_utils.dart';
 //import 'package:helixio_app/modules/helpers/agent_command_utils.dart';
 import 'package:helixio_app/pages/page_scaffold.dart';
-import 'package:helixio_app/pages/map_page.dart';
+import 'package:helixio_app/modules/core/widgets/control_map.dart';
 import 'package:helixio_app/modules/helpers/ground_tools.dart';
 
 class ControlPage extends StatefulWidget {
@@ -119,7 +119,7 @@ class _ControlPageState extends State<ControlPage> {
               ],
             );
           }),
-          Container(height: 300.0, child: MyMap()),
+          Container(height: 300.0, child: ControlMap()),
           Align(
             alignment: Alignment.topLeft,
             child: Consumer<SwarmManager>(
