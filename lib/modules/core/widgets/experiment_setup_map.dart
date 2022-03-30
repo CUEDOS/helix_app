@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 //import 'package:helixio_app/pages/page_scaffold.dart';
 import 'package:helixio_app/modules/helpers/service_locator.dart';
-import 'package:helixio_app/modules/core/models/agent_state.dart';
+import 'package:helixio_app/modules/helpers/coordinate_conversions.dart';
+//import 'package:helixio_app/modules/core/models/agent_state.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/gestures.dart';
 import 'package:latlng/latlng.dart';
 import 'package:map/map.dart';
 import 'package:helixio_app/modules/core/managers/swarm_manager.dart';
-import 'package:timer_builder/timer_builder.dart';
-import 'dart:math' as math;
 
 class ExperimentSetupMap extends StatefulWidget {
   const ExperimentSetupMap({Key? key}) : super(key: key);
@@ -122,6 +121,9 @@ class _ExperimentSetupMapState extends State<ExperimentSetupMap> {
                     );
                   },
                 ),
+                CustomPaint(
+                  painter: PolylinePainter(transformer),
+                ),
                 _buildMarkerWidget(
                     transformer.fromLatLngToXYCoords(
                         serviceLocator<SwarmManager>().getReferencePoint),
@@ -138,4 +140,47 @@ class _ExperimentSetupMapState extends State<ExperimentSetupMap> {
     //   child: const Icon(Icons.my_location),
     //),
   }
+}
+
+class PolylinePainter extends CustomPainter {
+  PolylinePainter(this.transformer);
+
+  final MapTransformer transformer;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..strokeWidth = 2;
+
+    var p1 = ned2Geodetic(NED(0, 0, 20),
+            Geodetic(LatLng(53.43578053111544, -2.250343561172483), 31))
+        .latLng;
+    var p2 = ned2Geodetic(NED(20, 20, 20),
+            Geodetic(LatLng(53.43578053111544, -2.250343561172483), 31))
+        .latLng;
+
+    canvas.drawLine(transformer.fromLatLngToXYCoords(p1),
+        transformer.fromLatLngToXYCoords(p2), paint);
+
+    // for (var line in _lines) {
+    //   paint.color = line.color;
+
+    //   for (int i = 0; i < line.stations.length - 1; i++) {
+    //     var p1 = transformer.fromLatLngToXYCoords(line.stations[i].position);
+    //     var p2 =
+    //         transformer.fromLatLngToXYCoords(line.stations[i + 1].position);
+
+    //     canvas.drawLine(p1, p2, paint);
+    //   }
+    // }
+  }
+
+  // Since this Sky painter has no fields, it always paints
+  // the same thing and semantics information is the same.
+  // Therefore we return false here. If we had fields (set
+  // from the constructor) then we would return true if any
+  // of them differed from the same fields on the oldDelegate.
+  @override
+  bool shouldRepaint(PolylinePainter oldDelegate) => false;
+  @override
+  bool shouldRebuildSemantics(PolylinePainter oldDelegate) => false;
 }
