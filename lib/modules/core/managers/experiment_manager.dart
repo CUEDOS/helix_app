@@ -1,23 +1,49 @@
 //import 'package:provider/provider.dart';
-import 'package:flutter/material.dart';
+//import 'package:flutter/material.dart';
 import 'package:latlng/latlng.dart';
 
-import 'package:helixio_app/modules/core/managers/mqtt_manager.dart';
-import '../models/agent_state.dart';
-import 'package:helixio_app/modules/helpers/service_locator.dart';
+// import 'package:helixio_app/modules/core/managers/mqtt_manager.dart';
+// import '../models/agent_state.dart';
+// import 'package:helixio_app/modules/helpers/service_locator.dart';
+import 'package:helixio_app/modules/helpers/corridor_generators.dart';
 
 class ExperimentManager {
   // may need to be a change notifier if we need to notify of updates to values
-  LatLng _referencePoint = LatLng(53.43578053111544, -2.250343561172483);
-  String _selectedExperimentType = 'Single';
-  double _corridorRadius = 1;
-  double _selectedMajorRadius = 1;
-  double _selectedMinorRadius = 1;
-  int _selectedPointsNumber = 1;
+  LatLng referencePoint = LatLng(53.43578053111544, -2.250343561172483);
+  String selectedExperimentType = 'Single';
+  double corridorRadius = 5;
+  double selectedMajorRadius = 30;
+  double selectedMinorRadius = 20;
+  int selectedPointsNumber = 1;
+  int _mapPointsNumber = 20;
+  List<List<double>> pointsForMap = [];
 
-  void setReferencePoint(LatLng referencePoint) {
-    _referencePoint = referencePoint;
+  void generatePointsForMap() {
+    switch (selectedExperimentType) {
+      case 'Single':
+        {
+          pointsForMap = singleEllipse(
+              _mapPointsNumber, selectedMajorRadius, selectedMinorRadius);
+        }
+        break;
+
+      case 'Double':
+        {
+          //statements;
+        }
+        break;
+
+      case 'Figure 8':
+        {
+          pointsForMap = figureEight(_mapPointsNumber, selectedMajorRadius,
+              selectedMinorRadius, selectedMajorRadius);
+        }
+        break;
+      case 'Line':
+        {
+          //statements;
+        }
+        break;
+    }
   }
-
-  LatLng get getReferencePoint => _referencePoint;
 }

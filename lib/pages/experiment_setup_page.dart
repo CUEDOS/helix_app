@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:helixio_app/pages/page_scaffold.dart';
 import 'package:helixio_app/modules/core/managers/mqtt_manager.dart';
 import 'package:helixio_app/modules/core/managers/swarm_manager.dart';
+import 'package:helixio_app/modules/core/managers/experiment_manager.dart';
 //import 'package:helixio_app/modules/core/models/agent_state.dart';
 //import 'package:helixio_app/modules/core/managers/mqtt_manager.dart';
 //import 'package:helixio_app/modules/core/models/mqtt_app_state.dart';
@@ -42,18 +43,18 @@ class ExperimentSetupEntry extends StatefulWidget {
 }
 
 class _ExperimentSetupEntryState extends State<ExperimentSetupEntry> {
-  String experimentType = 'Single';
+  //String experimentType = 'Single';
   static const double labelBoxWidth = 70;
-  double corridorRadius = 1;
-  double majorRadiusSliderValue = 1;
-  double minorRadiusSliderValue = 1;
-  int pointsNumberSliderValue = 1;
+  //double corridorRadius = 1;
+  //double majorRadiusSliderValue = 1;
+  //double minorRadiusSliderValue = 1;
+  //int pointsNumberSliderValue = 1;
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         DropdownButton<String>(
-          value: experimentType,
+          value: serviceLocator<ExperimentManager>().selectedExperimentType,
           icon: const Icon(Icons.arrow_downward),
           iconSize: 24,
           elevation: 16,
@@ -64,7 +65,8 @@ class _ExperimentSetupEntryState extends State<ExperimentSetupEntry> {
           ),
           onChanged: (String? newValue) {
             setState(() {
-              experimentType = newValue!;
+              serviceLocator<ExperimentManager>().selectedExperimentType =
+                  newValue!;
             });
           },
           items: <String>['Single', 'Double', 'Figure 8', 'Line']
@@ -84,20 +86,25 @@ class _ExperimentSetupEntryState extends State<ExperimentSetupEntry> {
             ),
             Expanded(
               child: Slider(
-                value: corridorRadius,
+                value: serviceLocator<ExperimentManager>().corridorRadius,
                 min: 1,
                 max: 20,
-                label: corridorRadius.toString(),
+                label: serviceLocator<ExperimentManager>()
+                    .corridorRadius
+                    .toString(),
                 onChanged: (double value) {
                   setState(() {
-                    corridorRadius = roundDouble(value, 1);
+                    serviceLocator<ExperimentManager>().corridorRadius =
+                        roundDouble(value, 1);
                   });
                 },
               ),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Text(corridorRadius.toString()),
+              child: Text(serviceLocator<ExperimentManager>()
+                  .corridorRadius
+                  .toString()),
             ),
           ],
         ),
@@ -110,21 +117,26 @@ class _ExperimentSetupEntryState extends State<ExperimentSetupEntry> {
             ),
             Expanded(
               child: Slider(
-                value: majorRadiusSliderValue,
+                value: serviceLocator<ExperimentManager>().selectedMajorRadius,
                 min: 1,
                 max: 50,
                 //divisions: 10,
-                label: majorRadiusSliderValue.toString(),
+                label: serviceLocator<ExperimentManager>()
+                    .selectedMajorRadius
+                    .toString(),
                 onChanged: (double value) {
                   setState(() {
-                    majorRadiusSliderValue = roundDouble(value, 1);
+                    serviceLocator<ExperimentManager>().selectedMajorRadius =
+                        roundDouble(value, 1);
                   });
                 },
               ),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Text(majorRadiusSliderValue.toString()),
+              child: Text(serviceLocator<ExperimentManager>()
+                  .selectedMajorRadius
+                  .toString()),
             ),
           ],
         ),
@@ -137,21 +149,26 @@ class _ExperimentSetupEntryState extends State<ExperimentSetupEntry> {
             ),
             Expanded(
               child: Slider(
-                value: minorRadiusSliderValue,
+                value: serviceLocator<ExperimentManager>().selectedMinorRadius,
                 min: 1,
                 max: 50,
                 //divisions: 10,
-                label: minorRadiusSliderValue.toString(),
+                label: serviceLocator<ExperimentManager>()
+                    .selectedMinorRadius
+                    .toString(),
                 onChanged: (double value) {
                   setState(() {
-                    minorRadiusSliderValue = roundDouble(value, 2);
+                    serviceLocator<ExperimentManager>().selectedMinorRadius =
+                        roundDouble(value, 2);
                   });
                 },
               ),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Text(minorRadiusSliderValue.toString()),
+              child: Text(serviceLocator<ExperimentManager>()
+                  .selectedMinorRadius
+                  .toString()),
             ),
           ],
         ),
@@ -164,22 +181,29 @@ class _ExperimentSetupEntryState extends State<ExperimentSetupEntry> {
             ),
             Expanded(
               child: Slider(
-                value: pointsNumberSliderValue.toDouble(),
+                value: serviceLocator<ExperimentManager>()
+                    .selectedPointsNumber
+                    .toDouble(),
                 min: 1,
                 max: 5000,
                 //divisions: 10,
-                label: pointsNumberSliderValue.toString(),
+                label: serviceLocator<ExperimentManager>()
+                    .selectedPointsNumber
+                    .toString(),
                 onChanged: (double value) {
                   setState(() {
                     //PointsNumberSliderValue = roundDouble(value, 0);
-                    pointsNumberSliderValue = value.toInt();
+                    serviceLocator<ExperimentManager>().selectedPointsNumber =
+                        value.toInt();
                   });
                 },
               ),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Text(pointsNumberSliderValue.toString()),
+              child: Text(serviceLocator<ExperimentManager>()
+                  .selectedPointsNumber
+                  .toString()),
             ),
           ],
         ),
@@ -207,16 +231,17 @@ class _ExperimentSetupEntryState extends State<ExperimentSetupEntry> {
     Map corridor = {};
     String corridorJson = '';
 
-    switch (experimentType) {
+    switch (serviceLocator<ExperimentManager>().selectedExperimentType) {
       case 'Single':
         {
           List<List<double>> corridorPoints = singleEllipse(
-              pointsNumberSliderValue,
-              majorRadiusSliderValue,
-              minorRadiusSliderValue);
+              serviceLocator<ExperimentManager>().selectedPointsNumber,
+              serviceLocator<ExperimentManager>().selectedMajorRadius,
+              serviceLocator<ExperimentManager>().selectedMinorRadius);
 
           corridor = {
-            'corridor_radius': corridorRadius,
+            'corridor_radius':
+                serviceLocator<ExperimentManager>().corridorRadius,
             'corridor_points': corridorPoints
           };
           corridorJson = jsonEncode(corridor);
@@ -232,13 +257,14 @@ class _ExperimentSetupEntryState extends State<ExperimentSetupEntry> {
       case 'Figure 8':
         {
           List<List<double>> corridorPoints = figureEight(
-              pointsNumberSliderValue,
-              majorRadiusSliderValue,
-              minorRadiusSliderValue,
-              majorRadiusSliderValue);
+              serviceLocator<ExperimentManager>().selectedPointsNumber,
+              serviceLocator<ExperimentManager>().selectedMajorRadius,
+              serviceLocator<ExperimentManager>().selectedMinorRadius,
+              serviceLocator<ExperimentManager>().selectedMajorRadius);
 
           corridor = {
-            'corridor_radius': corridorRadius,
+            'corridor_radius':
+                serviceLocator<ExperimentManager>().corridorRadius,
             'corridor_points': corridorPoints
           };
           corridorJson = jsonEncode(corridor);
