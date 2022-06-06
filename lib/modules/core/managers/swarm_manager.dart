@@ -8,7 +8,7 @@ import 'package:helixio_app/modules/helpers/service_locator.dart';
 
 class SwarmManager extends ChangeNotifier {
   int swarmSize = 0;
-  LatLng _referencePoint = LatLng(53.43578053111544, -2.250343561172483);
+  LatLng _referencePoint = LatLng(53.43335012150398, -2.249079103930851);
   var swarm = <String, AgentState>{}; // linter prefers this to map
   List<String> selected = [];
 
@@ -61,8 +61,10 @@ class SwarmManager extends ChangeNotifier {
     // check if the message is on the detection topic
     if (topicArray[0] == 'detection') {
       //add an agent to the swarm
-      swarm[payload] = AgentState(payload);
-      serviceLocator<MQTTManager>().subscribeTo(payload + '/#');
+      if (!swarm.containsKey(payload)) {
+        swarm[payload] = AgentState(payload);
+        serviceLocator<MQTTManager>().subscribeTo(payload + '/#');
+      }
     } else {
       // if the top level topic isnt detection it must be a drone id
       String id = topicArray[0];

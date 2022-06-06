@@ -20,7 +20,7 @@ class ControlMap extends StatefulWidget {
 
 class _ControlMapState extends State<ControlMap> {
   final controller = MapController(
-    location: LatLng(53.43578053111544, -2.250343561172483),
+    location: LatLng(53.43335012150398, -2.249079103930851),
   );
 
   bool _darkMode = false;
@@ -39,7 +39,7 @@ class _ControlMapState extends State<ControlMap> {
   }
 
   void _gotoDefault() {
-    controller.center = LatLng(53.43578053111544, -2.250343561172483);
+    controller.center = LatLng(53.43335012150398, -2.249079103930851);
     setState(() {});
   }
 

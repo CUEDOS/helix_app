@@ -9,7 +9,7 @@ import 'package:helixio_app/modules/helpers/corridor_generators.dart';
 
 class ExperimentManager {
   // may need to be a change notifier if we need to notify of updates to values
-  LatLng referencePoint = LatLng(53.43578053111544, -2.250343561172483);
+  LatLng referencePoint = LatLng(52.81634212236934, -4.12765441075898);
   String selectedExperimentType = 'Single';
   double corridorRadius = 5;
   double selectedMajorRadius = 30;

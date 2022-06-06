@@ -6,6 +6,7 @@ import 'dart:convert';
 //import 'package:provider/provider.dart';
 
 import 'package:helixio_app/pages/page_scaffold.dart';
+import 'package:latlng/latlng.dart';
 import 'package:helixio_app/modules/core/managers/mqtt_manager.dart';
 import 'package:helixio_app/modules/core/managers/swarm_manager.dart';
 import 'package:helixio_app/modules/core/managers/experiment_manager.dart';
@@ -286,6 +287,32 @@ class _ExperimentSetupEntryState extends State<ExperimentSetupEntry> {
         serviceLocator<MQTTManager>()
             .publish(agent + '/corridor_points', corridorJson);
       }
+    }
+    //TODO clean up a bit by putting this in swarm manager
+    LatLng refLatLng = serviceLocator<SwarmManager>().getReferencePoint;
+    Map<String, dynamic> parameters = {
+      'ref_lat': refLatLng.latitude,
+      'ref_lon': refLatLng.longitude
+    };
+    uploadParameters(parameters);
+  }
+}
+
+void uploadParameters(Map<String, dynamic> parameters) {
+  //serviceLocator<MQTTManager>().publish(topic, message);
+  var swarm = serviceLocator<SwarmManager>().swarm;
+  List<String> selected = serviceLocator<SwarmManager>().selected;
+  String parametersJson = jsonEncode(parameters);
+
+  if (selected.isEmpty) {
+    for (String agent in swarm.keys) {
+      serviceLocator<MQTTManager>()
+          .publish(agent + '/update_parameters', parametersJson);
+    }
+  } else {
+    for (String agent in selected) {
+      serviceLocator<MQTTManager>()
+          .publish(agent + '/update_parameters', parametersJson);
     }
   }
 }

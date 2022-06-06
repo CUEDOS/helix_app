@@ -9,7 +9,7 @@ List<List<double>> singleEllipse(
     corridorPoints.add([
       aEllipse * cos(i * 6.28 / numPoints),
       bEllipse * sin(i * 6.28 / numPoints),
-      -20.0
+      -20
     ]);
   }
   return corridorPoints;
