@@ -11,8 +11,9 @@ import 'package:helixio_app/modules/core/widgets/status_bar.dart';
 import 'package:helixio_app/modules/helpers/status_info_message_utils.dart';
 //import 'package:helixio_app/modules/helpers/agent_command_utils.dart';
 import 'package:helixio_app/pages/page_scaffold.dart';
-import 'package:helixio_app/pages/map_page.dart';
+import 'package:helixio_app/modules/core/widgets/control_map.dart';
 import 'package:helixio_app/modules/helpers/ground_tools.dart';
+import 'package:helixio_app/modules/helpers/round_double.dart';
 
 class ControlPage extends StatefulWidget {
   const ControlPage({Key? key}) : super(key: key);
@@ -48,94 +49,98 @@ class _ControlPageState extends State<ControlPage> {
   }
 
   Widget _buildColumn() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.vertical,
-      primary: false,
-      child: Column(
-        children: <Widget>[
-          Consumer<MQTTManager>(builder: (context, mqttManager, _) {
-            return Column(
-              children: [
-                StatusBar(
-                    statusMessage: prepareMQTTStateMessageFrom(
-                        mqttManager.currentState.getAppConnectionState)),
-                Align(
-                  alignment: Alignment.topLeft,
-                  child: Wrap(
-                    children: [
-                      _buildControlButton(
-                          mqttManager.currentState.getAppConnectionState,
-                          'Arm',
-                          'arm'),
-                      _buildControlButton(
-                          mqttManager.currentState.getAppConnectionState,
-                          'Takeoff',
-                          'takeoff'),
-                      _buildControlButton(
-                          mqttManager.currentState.getAppConnectionState,
-                          'Hold',
-                          'hold'),
-                      _buildControlButton(
-                          mqttManager.currentState.getAppConnectionState,
-                          'Return',
-                          'return'),
-                      _buildControlButton(
-                          mqttManager.currentState.getAppConnectionState,
-                          'Land',
-                          'land'),
-                    ],
+    return Stack(children: <Widget>[
+      //Container(height: 300.0, child: ControlMap()),
+      const ControlMap(),
+      SingleChildScrollView(
+        scrollDirection: Axis.vertical,
+        primary: false,
+        child: Column(
+          children: <Widget>[
+            Consumer<MQTTManager>(builder: (context, mqttManager, _) {
+              return Column(
+                children: [
+                  StatusBar(
+                      statusMessage: prepareMQTTStateMessageFrom(
+                          mqttManager.currentState.getAppConnectionState)),
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: Wrap(
+                      children: [
+                        _buildControlButton(
+                            mqttManager.currentState.getAppConnectionState,
+                            'Arm',
+                            'arm'),
+                        _buildControlButton(
+                            mqttManager.currentState.getAppConnectionState,
+                            'Takeoff',
+                            'takeoff'),
+                        _buildControlButton(
+                            mqttManager.currentState.getAppConnectionState,
+                            'Hold',
+                            'hold'),
+                        _buildControlButton(
+                            mqttManager.currentState.getAppConnectionState,
+                            'Return',
+                            'return'),
+                        _buildControlButton(
+                            mqttManager.currentState.getAppConnectionState,
+                            'Land',
+                            'land'),
+                      ],
+                    ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    children: [
-                      DropdownButton<String>(
-                        value: _dropdownValue,
-                        icon: const Icon(Icons.airplanemode_active),
-                        hint: const Text('Select Command'),
-                        items: <String>[
-                          'Simple Flocking',
-                          'Single Torus',
-                          'Racetrack Helix',
-                          'Figure 8',
-                          'Double Racetrack'
-                        ].map((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(value),
-                          );
-                        }).toList(),
-                        onChanged: (String? newValue) {
-                          setState(() {
-                            _dropdownValue = newValue!;
-                          });
-                        },
-                      ),
-                      _buildControlButton(
-                          mqttManager.currentState.getAppConnectionState,
-                          'Start',
-                          _dropdownValue),
-                    ],
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      children: [
+                        DropdownButton<String>(
+                          value: _dropdownValue,
+                          icon: const Icon(Icons.airplanemode_active),
+                          hint: const Text('Select Command'),
+                          items: <String>[
+                            'Experiment',
+                            'Simple Flocking',
+                          ].map((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value),
+                            );
+                          }).toList(),
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              _dropdownValue = newValue!;
+                            });
+                          },
+                        ),
+                        _buildControlButton(
+                            mqttManager.currentState.getAppConnectionState,
+                            'Pre Start',
+                            'pre_start'),
+                        _buildControlButton(
+                            mqttManager.currentState.getAppConnectionState,
+                            'Start',
+                            _dropdownValue),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            );
-          }),
-          Container(height: 300.0, child: MyMap()),
-          Align(
-            alignment: Alignment.topLeft,
-            child: Consumer<SwarmManager>(
-              builder: (context, swarmManager, _) {
-                return Wrap(
-                    //alignment: WrapAlignment.start,
-                    children: _buildInfoCardList(swarmManager));
-              },
-            ),
-          ),
-        ],
+                ],
+              );
+            }),
+          ],
+        ),
       ),
-    );
+      Align(
+        alignment: FractionalOffset.bottomLeft,
+        child: Consumer<SwarmManager>(
+          builder: (context, swarmManager, _) {
+            return Wrap(
+                alignment: WrapAlignment.end,
+                children: _buildInfoCardList(swarmManager));
+          },
+        ),
+      ),
+    ]);
   }
 
 //wrap widget requires list of widgets so need to return list of cards from this function
@@ -173,7 +178,7 @@ class _ControlPageState extends State<ControlPage> {
     List<String> selected = serviceLocator<SwarmManager>().selected;
     if (command == 'return') {
       var sortedSwarmALtitudes = altCalc(swarm,
-          31); //31 is altitude of hough end, change with function to get site elevation in future
+          18); //31 is altitude of hough end, change with function to get site elevation in future
       for (String agent in swarm.keys) {
         _publishMessage(
             agent + '/home/altitude', sortedSwarmALtitudes[agent].toString());
@@ -230,82 +235,117 @@ class AgentInfoCardState extends State<AgentInfoCard> {
     return SizedBox(
       width: 150.0,
       //height: 300.0,
-      child: Card(
-        shape: _selected
-            ? RoundedRectangleBorder(
-                side: const BorderSide(color: Colors.blue, width: 2.0),
-                borderRadius: BorderRadius.circular(4.0))
-            : RoundedRectangleBorder(
-                side: const BorderSide(color: Colors.white, width: 2.0),
-                borderRadius: BorderRadius.circular(4.0)),
+      child: Align(
+        alignment: FractionalOffset.bottomCenter,
         child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            ListTile(
-              //dense: true,
-              //leading: Icon(Icons.airplanemode_active),
-              title: Text(widget.agentState.getAgentID),
-              subtitle: Text(widget.agentState.getConnectionStatus),
-            ),
-            const Divider(
-              height: 0,
-              thickness: 2,
-              indent: 5,
-              endIndent: 5,
-              color: Colors.grey,
-            ),
-            //const SizedBox(width: 8),
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(5.0),
-                  alignment: Alignment.topLeft,
-                  child: Row(
+          children: [
+            Card(
+              shape: _selected
+                  ? RoundedRectangleBorder(
+                      side: const BorderSide(color: Colors.blue, width: 2.0),
+                      borderRadius: BorderRadius.circular(4.0))
+                  : RoundedRectangleBorder(
+                      side: const BorderSide(color: Colors.white, width: 2.0),
+                      borderRadius: BorderRadius.circular(4.0)),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  ListTile(
+                    //dense: true,
+                    //leading: Icon(Icons.airplanemode_active),
+                    title: Text(widget.agentState.getAgentID),
+                    subtitle: Text(widget.agentState.getConnectionStatus),
+                  ),
+                  const Divider(
+                    height: 0,
+                    thickness: 2,
+                    indent: 5,
+                    endIndent: 5,
+                    color: Colors.grey,
+                  ),
+                  //const SizedBox(width: 8),
+                  Row(
                     children: [
-                      const Icon(Icons.battery_full_sharp),
-                      Text(widget.agentState.getBatteryLevel.toString() + '%'),
+                      Container(
+                        padding: const EdgeInsets.all(5.0),
+                        alignment: Alignment.topLeft,
+                        child: Row(
+                          children: [
+                            const Icon(Icons.battery_full_sharp),
+                            Text(widget.agentState.getBatteryLevel.toString() +
+                                '%'),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(5.0),
+                        alignment: Alignment.topLeft,
+                        child: Row(
+                          children: [
+                            const Icon(Icons.wifi),
+                            Text(widget.agentState.getWifiStrength.toString() +
+                                'dB'),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
-                ),
-                Container(
-                  padding: const EdgeInsets.all(5.0),
-                  alignment: Alignment.topLeft,
-                  child: Row(
+                  Row(
                     children: [
-                      const Icon(Icons.wifi),
-                      Text(widget.agentState.getWifiStrength.toString() + 'dB'),
+                      const Icon(Icons.airplanemode_active),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Container(
+                              color: Colors.green,
+                              child: Center(
+                                child: Text(widget.agentState.getFlightMode),
+                              )),
+                        ),
+                      ),
                     ],
                   ),
-                ),
-              ],
-            ),
-            Row(
-              children: [
-                const Icon(Icons.airplanemode_active),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Container(
-                        color: Colors.green,
-                        child: Center(
-                          child: Text(widget.agentState.getFlightMode),
-                        )),
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: TextButton(
+                      child: Text(_buttonText),
+                      onPressed: () {
+                        toggleSelected();
+                      },
+                    ),
                   ),
-                ),
-              ],
-            ),
-            Align(
-              alignment: Alignment.bottomRight,
-              child: TextButton(
-                child: Text(_buttonText),
-                onPressed: () {
-                  toggleSelected();
-                },
+                ],
               ),
             ),
+            widget.agentState.getCloseTo.isNotEmpty
+                ? Container(
+                    width: double.infinity,
+                    child: Card(
+                      //width: 150.0,
+                      color: Colors.red,
+                      child: Column(
+                        children: getCloseToWidgets(),
+                      ),
+                    ),
+                  )
+                : Container(height: 0),
           ],
         ),
       ),
     );
+  }
+
+  List<Widget> getCloseToWidgets() {
+    List<Widget> _widgets = [];
+
+    // List<String> _closeTo = widget.agentState.getCloseTo;
+    // for (int i = 0; i < _closeTo.length; i++) {
+    //   _widgets.add(Text('CLOSE TO ' + _closeTo[i]));
+    // }
+    widget.agentState.getCloseTo.forEach((agent, distance) {
+      _widgets
+          .add(Text(roundDouble(distance, 1).toString() + 'm from ' + agent));
+    });
+    return _widgets;
   }
 }

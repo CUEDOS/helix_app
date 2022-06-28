@@ -19,7 +19,6 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // 3. watch selectedPageBuilderProvider
     final selectedPageBuilder = ref.watch(selectedPageBuilderProvider);
     return provider.MultiProvider(
         providers: [

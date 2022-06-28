@@ -99,7 +99,7 @@ class _SwarmSizeSliderState extends State<SwarmSizeSlider> {
     _mqttManager = Provider.of<MQTTManager>(context, listen: false);
     if (_mqttManager.currentState.getAppConnectionState ==
         MQTTAppConnectionState.connected) {
-      _swarmManager.initialiseSwarm(_swarmManager.swarmSize, _mqttManager);
+      //_swarmManager.initialiseSwarm(_swarmManager.swarmSize, _mqttManager);
       //not good practice to pass a variable from the class back
       ////into the method but it works, fix later
     } else {
