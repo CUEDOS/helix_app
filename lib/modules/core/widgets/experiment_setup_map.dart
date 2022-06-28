@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 //import 'package:helixio_app/pages/page_scaffold.dart';
 import 'package:helixio_app/modules/helpers/service_locator.dart';
 import 'package:helixio_app/modules/helpers/coordinate_conversions.dart';
+import 'package:helixio_app/modules/core/secrets/keys.dart';
 //import 'package:helixio_app/modules/core/models/agent_state.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/gestures.dart';
@@ -20,11 +21,12 @@ class ExperimentSetupMap extends StatefulWidget {
 
 class _ExperimentSetupMapState extends State<ExperimentSetupMap> {
   final controller = MapController(
-    location: LatLng(53.43335012150398, -2.249079103930851),
+    location: LatLng(53.43578053111544, -2.250343561172483),
+    //location: LatLng(52.81651946850575, -4.124781265539541),
   );
 
   void _gotoDefault() {
-    controller.center = LatLng(53.43335012150398, -2.249079103930851);
+    controller.center = LatLng(53.43578053111544, -2.250343561172483);
     setState(() {});
   }
 
@@ -110,11 +112,9 @@ class _ExperimentSetupMapState extends State<ExperimentSetupMap> {
                 Map(
                   controller: controller,
                   builder: (context, x, y, z) {
-                    //Legal notice: This url is only used for demo and educational purposes. You need a license key for production use.
-
-                    //Google Maps
                     final url =
-                        'https://www.google.com/maps/vt/pb=!1m4!1m3!1i$z!2i$x!3i$y!2m3!1e0!2sm!3i420120488!3m7!2sen!5e1105!12m4!1e68!2m2!1sset!2sRoadmap!4e0!5m1!1e0!23i4111425';
+                        'https://api.mapbox.com/styles/v1/mapbox/satellite-v9/tiles/$z/$x/$y?access_token=' +
+                            mapBoxApiKey;
 
                     return CachedNetworkImage(
                       imageUrl: url,

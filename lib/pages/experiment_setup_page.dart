@@ -217,7 +217,8 @@ class _ExperimentSetupEntryState extends State<ExperimentSetupEntry> {
                 //primary: Colors.deepOrange
               ),
               onPressed: () {
-                _uploadCorridor();
+                //_uploadCorridor();
+                uploadParameters();
               },
             ))
       ],
@@ -288,18 +289,17 @@ class _ExperimentSetupEntryState extends State<ExperimentSetupEntry> {
             .publish(agent + '/corridor_points', corridorJson);
       }
     }
-    //TODO clean up a bit by putting this in swarm manager
-    LatLng refLatLng = serviceLocator<SwarmManager>().getReferencePoint;
-    Map<String, dynamic> parameters = {
-      'ref_lat': refLatLng.latitude,
-      'ref_lon': refLatLng.longitude
-    };
-    uploadParameters(parameters);
   }
 }
 
-void uploadParameters(Map<String, dynamic> parameters) {
+void uploadParameters() {
   //serviceLocator<MQTTManager>().publish(topic, message);
+  //TODO clean up a bit by putting this in swarm manager
+  LatLng refLatLng = serviceLocator<SwarmManager>().getReferencePoint;
+  Map<String, dynamic> parameters = {
+    'ref_lat': refLatLng.latitude,
+    'ref_lon': refLatLng.longitude
+  };
   var swarm = serviceLocator<SwarmManager>().swarm;
   List<String> selected = serviceLocator<SwarmManager>().selected;
   String parametersJson = jsonEncode(parameters);

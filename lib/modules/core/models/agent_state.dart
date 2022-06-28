@@ -1,4 +1,6 @@
 import 'package:latlng/latlng.dart';
+import 'package:helixio_app/modules/helpers/coordinate_conversions.dart'
+    show NED;
 
 enum agentCommand {
   none,
@@ -29,6 +31,9 @@ class AgentState {
   LatLng _latLng = LatLng(0, 0);
   double _heading = 0;
   double _absoluteAltitude = 0;
+  NED _positionNed = NED(0, 0, 0);
+  bool _armStatus = false;
+  Map<String, double> _closeTo = {};
   agentCommand _currentCommand = agentCommand.none;
   SwarmingGains _swarmingGains = SwarmingGains(0, 0, 0, 0);
   AgentState(this._agentID);
@@ -64,6 +69,22 @@ class AgentState {
     _absoluteAltitude = absoluteAltitude;
   }
 
+  void setNED(NED positionNed) {
+    _positionNed = positionNed;
+  }
+
+  void setArmStatus(bool armStatus) {
+    _armStatus = armStatus;
+  }
+
+  void addCloseTo(String id, double distance) {
+    _closeTo[id] = distance;
+  }
+
+  void removeCloseTo(String id) {
+    _closeTo.remove(id);
+  }
+
   void setHeading(double heading) {
     _heading = heading;
   }
@@ -81,6 +102,9 @@ class AgentState {
   LatLng get getLatLng => _latLng;
   double get getabsoluteAltitude => _absoluteAltitude;
   double get getHeading => _heading;
+  NED get getNED => _positionNed;
+  bool get getArmStatus => _armStatus;
+  Map<String, double> get getCloseTo => _closeTo;
   SwarmingGains get getSwarmingGains => _swarmingGains;
   agentCommand get getCurrentCommand => _currentCommand;
 }
