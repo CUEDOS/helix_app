@@ -23,7 +23,7 @@ class ControlPage extends StatefulWidget {
 }
 
 class _ControlPageState extends State<ControlPage> {
-  String _dropdownValue = 'Experiment 1';
+  String _dropdownValue = 'convergence_W_to_E';
   //final TextEditingController _messageTextController = TextEditingController();
   //final TextEditingController _topicTextController = TextEditingController();
   //final _controller = ScrollController();
@@ -99,8 +99,10 @@ class _ControlPageState extends State<ControlPage> {
                           icon: const Icon(Icons.airplanemode_active),
                           hint: const Text('Select Command'),
                           items: <String>[
-                            'Experiment 1',
-                            'experiment 2',
+                            'convergence_W_to_E',
+                            'convergence_S_to_N',
+                            'divergence_W_to_E',
+                            'divergence_S_to_N',
                           ].map((String value) {
                             return DropdownMenuItem<String>(
                               value: value,
@@ -134,7 +136,7 @@ class _ControlPageState extends State<ControlPage> {
                                               .swarm
                                               .keys) {
                                         _publishMessage(
-                                            agent + "current_experiment",
+                                            agent + "/current_experiment",
                                             _dropdownValue);
                                       }
                                     }
@@ -147,7 +149,7 @@ class _ControlPageState extends State<ControlPage> {
                         _buildControlButton(
                             mqttManager.currentState.getAppConnectionState,
                             'Start',
-                            _dropdownValue),
+                            'Experiment'),
                       ],
                     ),
                   ),
