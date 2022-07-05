@@ -21,8 +21,8 @@ class ControlMap extends StatefulWidget {
 
 class _ControlMapState extends State<ControlMap> {
   final controller = MapController(
-    location: LatLng(53.43578053111544, -2.250343561172483),
-    //location: LatLng(52.81651946850575, -4.124781265539541),
+    //location: LatLng(53.43578053111544, -2.250343561172483),
+    location: LatLng(52.81651946850575, -4.124781265539541),
   );
 
   bool _darkMode = false;

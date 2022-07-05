@@ -21,8 +21,8 @@ class ExperimentSetupMap extends StatefulWidget {
 
 class _ExperimentSetupMapState extends State<ExperimentSetupMap> {
   final controller = MapController(
-    location: LatLng(53.43578053111544, -2.250343561172483),
-    //location: LatLng(52.81651946850575, -4.124781265539541),
+    //location: LatLng(53.43578053111544, -2.250343561172483),
+    location: LatLng(52.81651946850575, -4.124781265539541),
   );
 
   void _gotoDefault() {

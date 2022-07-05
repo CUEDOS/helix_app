@@ -23,7 +23,7 @@ class ControlPage extends StatefulWidget {
 }
 
 class _ControlPageState extends State<ControlPage> {
-  String _dropdownValue = 'Simple Flocking';
+  String _dropdownValue = 'Experiment 1';
   //final TextEditingController _messageTextController = TextEditingController();
   //final TextEditingController _topicTextController = TextEditingController();
   //final _controller = ScrollController();
@@ -99,8 +99,8 @@ class _ControlPageState extends State<ControlPage> {
                           icon: const Icon(Icons.airplanemode_active),
                           hint: const Text('Select Command'),
                           items: <String>[
-                            'Experiment',
-                            'Simple Flocking',
+                            'Experiment 1',
+                            'experiment 2',
                           ].map((String value) {
                             return DropdownMenuItem<String>(
                               value: value,
@@ -113,6 +113,33 @@ class _ControlPageState extends State<ControlPage> {
                             });
                           },
                         ),
+                        Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: ElevatedButton(
+                              child: const Text('Select'),
+                              style: ElevatedButton.styleFrom(
+                                fixedSize: const Size(88, 36),
+                                //primary: Colors.deepOrange
+                              ),
+                              onPressed: mqttManager.currentState
+                                              .getAppConnectionState ==
+                                          MQTTAppConnectionState.connected ||
+                                      mqttManager.currentState
+                                              .getAppConnectionState ==
+                                          MQTTAppConnectionState
+                                              .connectedSubscribed
+                                  ? () {
+                                      for (String agent
+                                          in serviceLocator<SwarmManager>()
+                                              .swarm
+                                              .keys) {
+                                        _publishMessage(
+                                            agent + "current_experiment",
+                                            _dropdownValue);
+                                      }
+                                    }
+                                  : null,
+                            )),
                         _buildControlButton(
                             mqttManager.currentState.getAppConnectionState,
                             'Pre Start',
