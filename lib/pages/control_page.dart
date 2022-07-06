@@ -99,10 +99,14 @@ class _ControlPageState extends State<ControlPage> {
                           icon: const Icon(Icons.airplanemode_active),
                           hint: const Text('Select Command'),
                           items: <String>[
-                            'convergence_W_to_E',
-                            'convergence_S_to_N',
-                            'divergence_W_to_E',
-                            'divergence_S_to_N',
+                            'Torus_S_to_N_NZ',
+                            'Circle_S_to_N_NZ',
+                            'convergence_S_to_N_NE',
+                            'convergence_S_to_N_NZ',
+                            'convergence_W_to_E_EN',
+                            'convergence_W_to_E_EZ',
+                            'divergence_S_to_N_NE',
+                            'divergence_S_to_N_NE',
                           ].map((String value) {
                             return DropdownMenuItem<String>(
                               value: value,
