@@ -42,7 +42,7 @@ class _ExperimentSetupMapState extends State<ExperimentSetupMap> {
     _scaleStart = 1.0;
   }
 
-  void _onScaleUpdate(ScaleUpdateDetails details) {
+  void _onScaleUpdate(ScaleUpdateDetails details, MapTransformer transformer) {
     final scaleDiff = details.scale - _scaleStart;
     _scaleStart = details.scale;
 
@@ -56,7 +56,7 @@ class _ExperimentSetupMapState extends State<ExperimentSetupMap> {
       final now = details.focalPoint;
       final diff = now - _dragStart!;
       _dragStart = now;
-      controller.drag(diff.dx, diff.dy);
+      transformer.drag(diff.dx, diff.dy);
       setState(() {});
     }
   }
@@ -73,7 +73,7 @@ class _ExperimentSetupMapState extends State<ExperimentSetupMap> {
 
   @override
   Widget build(BuildContext context) {
-    return MapLayoutBuilder(
+    return MapLayout(
       controller: controller,
       builder: (context, transformer) {
         //List<Widget> Flag = [];
@@ -82,12 +82,11 @@ class _ExperimentSetupMapState extends State<ExperimentSetupMap> {
           behavior: HitTestBehavior.opaque,
           onDoubleTap: _onDoubleTap,
           onScaleStart: _onScaleStart,
-          onScaleUpdate: _onScaleUpdate,
+          onScaleUpdate: (details) => _onScaleUpdate(details, transformer),
           onTapUp: (details) {
-            final location =
-                transformer.fromXYCoordsToLatLng(details.localPosition);
+            final location = transformer.toLatLng(details.localPosition);
 
-            final clicked = transformer.fromLatLngToXYCoords(location);
+            final clicked = transformer.toOffset(location);
 
             //selectedLocation = location;
             serviceLocator<SwarmManager>().setReferencePoint(location);
@@ -126,7 +125,7 @@ class _ExperimentSetupMapState extends State<ExperimentSetupMap> {
                   painter: PolylinePainter(transformer),
                 ),
                 _buildMarkerWidget(
-                    transformer.fromLatLngToXYCoords(
+                    transformer.toOffset(
                         serviceLocator<SwarmManager>().getReferencePoint),
                     Colors.white)
               ],
@@ -181,8 +180,8 @@ class PolylinePainter extends CustomPainter {
               Geodetic(serviceLocator<SwarmManager>().getReferencePoint, 31))
           .latLng;
 
-      canvas.drawLine(transformer.fromLatLngToXYCoords(p1),
-          transformer.fromLatLngToXYCoords(p2), paint);
+      canvas.drawLine(
+          transformer.toOffset(p1), transformer.toOffset(p2), paint);
     }
   }
 

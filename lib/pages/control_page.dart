@@ -23,7 +23,7 @@ class ControlPage extends StatefulWidget {
 }
 
 class _ControlPageState extends State<ControlPage> {
-  String _dropdownValue = 'convergence_W_to_E';
+  String _dropdownValue = 'convergence_S_to_N_NZ';
   //final TextEditingController _messageTextController = TextEditingController();
   //final TextEditingController _topicTextController = TextEditingController();
   //final _controller = ScrollController();
@@ -220,17 +220,22 @@ class _ControlPageState extends State<ControlPage> {
       }
     } else if (selected.isEmpty) {
       for (String agent in swarm.keys) {
-        _publishMessage('commands/' + agent, command);
+        _sendCommand(agent, command);
       }
     } else {
       for (String agent in selected) {
-        _publishMessage('commands/' + agent, command);
+        _sendCommand(agent, command);
       }
     }
   }
 
   void _publishMessage(String topic, String message) {
     serviceLocator<MQTTManager>().publish(topic, message);
+    //_messageTextController.clear();
+  }
+
+  void _sendCommand(String agent, String command) {
+    serviceLocator<MQTTManager>().sendCommand(agent, command);
     //_messageTextController.clear();
   }
 }

@@ -6,6 +6,7 @@ import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 import '../models/mqtt_app_state.dart';
 import 'package:helixio_app/modules/core/managers/swarm_manager.dart';
+import 'dart:async';
 import 'package:provider/provider.dart';
 
 class MQTTManager extends ChangeNotifier {
@@ -77,6 +78,63 @@ class MQTTManager extends ChangeNotifier {
     final MqttClientPayloadBuilder builder = MqttClientPayloadBuilder();
     builder.addString(message);
     _client!.publishMessage(topic, MqttQos.exactlyOnce, builder.payload!);
+  }
+
+  Future<void> sendCommand(String agent, String command) async {
+    final MqttClientPayloadBuilder builder = MqttClientPayloadBuilder();
+    builder.addString(command);
+    int iterator = 0;
+
+    switch (command) {
+      case 'arm':
+        Timer.periodic(const Duration(seconds: 1), (timer) {
+          iterator += 1;
+          _client!.publishMessage(
+              'commands/' + agent, MqttQos.exactlyOnce, builder.payload!);
+          if ((serviceLocator<SwarmManager>().swarm[agent]?.getArmStatus ==
+                  true) |
+              (iterator == 5)) {
+            timer.cancel();
+          }
+        });
+        break;
+
+      case 'takeoff':
+        Timer.periodic(const Duration(seconds: 1), (timer) {
+          iterator += 1;
+          _client!.publishMessage(
+              'commands/' + agent, MqttQos.exactlyOnce, builder.payload!);
+          if ((serviceLocator<SwarmManager>().swarm[agent]?.getFlightMode ==
+                  'TAKEOFF') |
+              (iterator == 5)) {
+            timer.cancel();
+          }
+        });
+        break;
+
+      case 'hold':
+        Timer.periodic(const Duration(seconds: 1), (timer) {
+          iterator += 1;
+          _client!.publishMessage(
+              'commands/' + agent, MqttQos.exactlyOnce, builder.payload!);
+          if ((serviceLocator<SwarmManager>().swarm[agent]?.getFlightMode ==
+                  'HOLD') |
+              (iterator == 5)) {
+            timer.cancel();
+          }
+        });
+        break;
+
+      default:
+        {
+          _client!.publishMessage(
+              'commands/' + agent, MqttQos.exactlyOnce, builder.payload!);
+        }
+        break;
+    }
+    //final MqttClientPayloadBuilder builder = MqttClientPayloadBuilder();
+    //builder.addString(command);
+    //_client!.publishMessage(topic, MqttQos.exactlyOnce, builder.payload!);
   }
 
   /// The subscribed callback

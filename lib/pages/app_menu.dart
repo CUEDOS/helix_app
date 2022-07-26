@@ -8,11 +8,13 @@ import 'package:helixio_app/pages/gains_setup_page.dart';
 import 'package:helixio_app/pages/sitl_setup_page.dart';
 import 'package:helixio_app/pages/mqtt_console_page.dart';
 import 'package:helixio_app/pages/mqtt_settings_page.dart';
+import 'package:helixio_app/pages/software_upload.dart';
 
 // a map of ("page name", WidgetBuilder) pairs
 final _availablePages = <String, WidgetBuilder>{
   'Control': (_) => const ControlPage(),
   'Experiment Setup': (_) => const ExperimentSetupPage(),
+  'Software Upload': (_) => const SoftwareUploadPage(),
   'Adjust Gains': (_) => const GainsSetupPage(),
   'MQTT Console': (_) => const MQTTConsolePage(),
   'MQTT Settings': (_) => const SettingsScreen(),

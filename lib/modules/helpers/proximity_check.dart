@@ -18,7 +18,7 @@ import 'package:helixio_app/modules/helpers/coordinate_conversions.dart'
 double getSquaredDistance(NED p1, NED p2) {
   return (pow(p2.north - p1.north, 2) +
           pow(p2.east - p1.east, 2) +
-          pow(p2.east - p1.east, 2))
+          pow(p2.down - p1.down, 2))
       .toDouble();
 }
 

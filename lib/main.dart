@@ -6,6 +6,7 @@ import 'package:helixio_app/pages/app_menu.dart';
 import 'package:helixio_app/pages/split_view.dart';
 import 'modules/core/managers/mqtt_manager.dart';
 import 'modules/core/managers/swarm_manager.dart';
+import 'modules/core/managers/software_upload_manager.dart';
 import 'modules/helpers/service_locator.dart';
 
 void main() {
@@ -26,6 +27,8 @@ class MyApp extends ConsumerWidget {
               create: (context) => serviceLocator<MQTTManager>()),
           provider.ChangeNotifierProvider(
               create: (context) => serviceLocator<SwarmManager>()),
+          provider.ChangeNotifierProvider(
+              create: (context) => SoftwareUploadManager()),
         ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,

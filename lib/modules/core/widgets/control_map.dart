@@ -34,7 +34,7 @@ class _ControlMapState extends State<ControlMap> {
       Iterable<AgentState> agents = swarm.values;
       for (AgentState agent in agents) {
         agentMarkers.add(AgentMarker(agent.getLatLng, agent.getHeading,
-            transformer.fromLatLngToXYCoords(agent.getLatLng)));
+            transformer.toOffset(agent.getLatLng)));
       }
     }
     return agentMarkers;
@@ -69,7 +69,7 @@ class _ControlMapState extends State<ControlMap> {
     _scaleStart = 1.0;
   }
 
-  void _onScaleUpdate(ScaleUpdateDetails details) {
+  void _onScaleUpdate(ScaleUpdateDetails details, MapTransformer transformer) {
     final scaleDiff = details.scale - _scaleStart;
     _scaleStart = details.scale;
 
@@ -83,7 +83,7 @@ class _ControlMapState extends State<ControlMap> {
       final now = details.focalPoint;
       final diff = now - _dragStart!;
       _dragStart = now;
-      controller.drag(diff.dx, diff.dy);
+      transformer.drag(diff.dx, diff.dy);
       setState(() {});
     }
   }
@@ -114,7 +114,7 @@ class _ControlMapState extends State<ControlMap> {
     // increases performance
     return TimerBuilder.periodic(const Duration(milliseconds: 100),
         builder: (context) {
-      return MapLayoutBuilder(
+      return MapLayout(
         controller: controller,
         builder: (context, transformer) {
           // final markerPositions = _generateMarkers(widget.swarmManager)
@@ -147,12 +147,11 @@ class _ControlMapState extends State<ControlMap> {
             behavior: HitTestBehavior.opaque,
             onDoubleTap: _onDoubleTap,
             onScaleStart: _onScaleStart,
-            onScaleUpdate: _onScaleUpdate,
+            onScaleUpdate: (details) => _onScaleUpdate(details, transformer),
             onTapUp: (details) {
-              final location =
-                  transformer.fromXYCoordsToLatLng(details.localPosition);
+              final location = transformer.toLatLng(details.localPosition);
 
-              final clicked = transformer.fromLatLngToXYCoords(location);
+              final clicked = transformer.toOffset(location);
 
               print('${location.longitude}, ${location.latitude}');
               print('${clicked.dx}, ${clicked.dy}');
