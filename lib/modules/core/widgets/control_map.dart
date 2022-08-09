@@ -121,108 +121,89 @@ class _ControlMapState extends State<ControlMap> {
   @override
   Widget build(BuildContext context) {
     print('drawing map');
-    //_getUserLocation();
-    // used to update map at set frequency rather than as fast as updates are received
-    // increases performance
 
     return Stack(children: [
-      TimerBuilder.periodic(const Duration(milliseconds: 100),
-          builder: (context) {
-        return MapLayout(
-          controller: controller,
-          builder: (context, transformer) {
-            // final markerPositions = _generateMarkers(widget.swarmManager)
-            //     .map((agentMarker) =>
-            //         transformer.fromLatLngToXYCoords(agentMarker.getLatLng))
-            //     .toList();
+      MapLayout(
+        controller: controller,
+        builder: (context, transformer) {
+          final centerLocation = Offset(
+              transformer.constraints.biggest.width / 2,
+              transformer.constraints.biggest.height / 2);
 
-            var swarm = serviceLocator<SwarmManager>().swarm;
+          return GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onDoubleTap: _onDoubleTap,
+            onScaleStart: _onScaleStart,
+            onScaleUpdate: (details) => _onScaleUpdate(details, transformer),
+            onTapUp: (details) {
+              final location = transformer.toLatLng(details.localPosition);
 
-            final markerPositions = _generateMarkers(swarm, transformer);
+              final clicked = transformer.toOffset(location);
 
-            final markerWidgets = markerPositions.map(
-              (agentMarker) => _buildMarkerWidget(
-                  agentMarker.cartesian, agentMarker.heading, Colors.red),
-            );
-
-            // final homeLocation = transformer.fromLatLngToXYCoords(
-            //     LatLng(53.43578053111544, -2.250343561172483));
-
-            //final homeMarkerWidget = _buildMarkerWidget(homeLocation, Colors.black);
-
-            final centerLocation = Offset(
-                transformer.constraints.biggest.width / 2,
-                transformer.constraints.biggest.height / 2);
-
-            // final centerMarkerWidget =
-            //     _buildMarkerWidget(centerLocation, Colors.purple);
-
-            return GestureDetector(
+              print('${location.longitude}, ${location.latitude}');
+              print('${clicked.dx}, ${clicked.dy}');
+              print('${details.localPosition.dx}, ${details.localPosition.dy}');
+            },
+            child: Listener(
               behavior: HitTestBehavior.opaque,
-              onDoubleTap: _onDoubleTap,
-              onScaleStart: _onScaleStart,
-              onScaleUpdate: (details) => _onScaleUpdate(details, transformer),
-              onTapUp: (details) {
-                final location = transformer.toLatLng(details.localPosition);
+              onPointerSignal: (event) {
+                if (event is PointerScrollEvent) {
+                  final delta = event.scrollDelta;
 
-                final clicked = transformer.toOffset(location);
-
-                print('${location.longitude}, ${location.latitude}');
-                print('${clicked.dx}, ${clicked.dy}');
-                print(
-                    '${details.localPosition.dx}, ${details.localPosition.dy}');
+                  controller.zoom -= delta.dy / 1000.0;
+                  setState(() {});
+                }
               },
-              child: Listener(
-                behavior: HitTestBehavior.opaque,
-                onPointerSignal: (event) {
-                  if (event is PointerScrollEvent) {
-                    final delta = event.scrollDelta;
+              child: Stack(
+                children: [
+                  TileLayer(
+                    builder: (context, x, y, z) {
+                      final tilesInZoom = pow(2.0, z).floor();
 
-                    controller.zoom -= delta.dy / 1000.0;
-                    setState(() {});
-                  }
-                },
-                child: Stack(
-                  children: [
-                    TileLayer(
-                      builder: (context, x, y, z) {
-                        final tilesInZoom = pow(2.0, z).floor();
+                      while (x < 0) {
+                        x += tilesInZoom;
+                      }
+                      while (y < 0) {
+                        y += tilesInZoom;
+                      }
 
-                        while (x < 0) {
-                          x += tilesInZoom;
-                        }
-                        while (y < 0) {
-                          y += tilesInZoom;
-                        }
+                      x %= tilesInZoom;
+                      y %= tilesInZoom;
+                      //Mapbox Streets
+                      final url =
+                          'https://api.mapbox.com/styles/v1/mapbox/satellite-v9/tiles/$z/$x/$y?access_token=' +
+                              mapBoxApiKey;
 
-                        x %= tilesInZoom;
-                        y %= tilesInZoom;
-                        //Mapbox Streets
-                        final url =
-                            'https://api.mapbox.com/styles/v1/mapbox/satellite-v9/tiles/$z/$x/$y?access_token=' +
-                                mapBoxApiKey;
+                      return CachedNetworkImage(
+                        imageUrl: url,
+                        fit: BoxFit.cover,
+                      );
+                    },
+                  ),
+                  // used to update markers at set frequency rather than as fast as updates are received
+                  // increases performance
+                  TimerBuilder.periodic(const Duration(milliseconds: 100),
+                      builder: (context) {
+                    print("rebuilding markers");
+                    var swarm = serviceLocator<SwarmManager>().swarm;
 
-                        return CachedNetworkImage(
-                          imageUrl: url,
-                          fit: BoxFit.cover,
-                        );
-                      },
-                    ),
-                    //homeMarkerWidget,
-                    ...markerWidgets,
-                    //centerMarkerWidget,
-                  ],
-                ),
+                    final markerPositions =
+                        _generateMarkers(swarm, transformer);
+
+                    final markerWidgets = markerPositions.map(
+                      (agentMarker) => _buildMarkerWidget(agentMarker.cartesian,
+                          agentMarker.heading, Colors.red),
+                    );
+                    return Stack(
+                      children: [...markerWidgets],
+                    );
+                  }),
+                ],
               ),
-            );
-          },
-        );
-        // floatingActionButton: FloatingActionButton(
-        //   onPressed: _gotoDefault,
-        //   tooltip: 'My Location',
-        //   child: const Icon(Icons.my_location),
-        //),
-      }),
+            ),
+          );
+        },
+      ),
       Align(
         alignment: Alignment.bottomRight,
         child: Padding(
