@@ -10,6 +10,7 @@ import 'package:latlng/latlng.dart';
 import 'package:map/map.dart';
 import 'package:helixio_app/modules/core/managers/swarm_manager.dart';
 import 'package:helixio_app/modules/core/managers/experiment_manager.dart';
+import 'dart:math';
 
 class ExperimentSetupMap extends StatefulWidget {
   const ExperimentSetupMap({Key? key}) : super(key: key);
@@ -22,7 +23,7 @@ class ExperimentSetupMap extends StatefulWidget {
 class _ExperimentSetupMapState extends State<ExperimentSetupMap> {
   final controller = MapController(
     //location: LatLng(53.43578053111544, -2.250343561172483),
-    location: LatLng(52.81651946850575, -4.124781265539541),
+    location: const LatLng(52.81651946850575, -4.124781265539541),
   );
 
   void _gotoDefault() {
@@ -108,9 +109,20 @@ class _ExperimentSetupMapState extends State<ExperimentSetupMap> {
             },
             child: Stack(
               children: [
-                Map(
-                  controller: controller,
+                TileLayer(
                   builder: (context, x, y, z) {
+                    final tilesInZoom = pow(2.0, z).floor();
+
+                    while (x < 0) {
+                      x += tilesInZoom;
+                    }
+                    while (y < 0) {
+                      y += tilesInZoom;
+                    }
+
+                    x %= tilesInZoom;
+                    y %= tilesInZoom;
+
                     final url =
                         'https://api.mapbox.com/styles/v1/mapbox/satellite-v9/tiles/$z/$x/$y?access_token=' +
                             mapBoxApiKey;

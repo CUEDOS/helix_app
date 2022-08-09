@@ -9,7 +9,8 @@ import 'package:latlng/latlng.dart';
 import 'package:map/map.dart';
 import 'package:helixio_app/modules/core/managers/swarm_manager.dart';
 import 'package:timer_builder/timer_builder.dart';
-import 'dart:math' as math;
+import 'dart:math';
+import 'package:geolocator/geolocator.dart';
 
 class ControlMap extends StatefulWidget {
   const ControlMap({Key? key}) : super(key: key);
@@ -42,6 +43,16 @@ class _ControlMapState extends State<ControlMap> {
 
   void _gotoDefault() {
     controller.center = LatLng(53.43578053111544, -2.250343561172483);
+    setState(() {});
+  }
+
+  Future<void> _getUserLocation() async {
+    print("getting location");
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+    controller.center = LatLng(position.latitude, position.longitude);
+    print("latitude= " + position.latitude.toString());
+    print("longitude= " + position.longitude.toString());
     setState(() {});
   }
 
@@ -102,7 +113,7 @@ class _ControlMapState extends State<ControlMap> {
       // ),
       child: Transform.rotate(
           //convert heading in degrees to radians
-          angle: heading * (math.pi / 180),
+          angle: heading * (pi / 180),
           child: Icon(Icons.airplanemode_active, color: color, size: 15)),
     );
   }
@@ -110,94 +121,128 @@ class _ControlMapState extends State<ControlMap> {
   @override
   Widget build(BuildContext context) {
     print('drawing map');
+    //_getUserLocation();
     // used to update map at set frequency rather than as fast as updates are received
     // increases performance
-    return TimerBuilder.periodic(const Duration(milliseconds: 100),
-        builder: (context) {
-      return MapLayout(
-        controller: controller,
-        builder: (context, transformer) {
-          // final markerPositions = _generateMarkers(widget.swarmManager)
-          //     .map((agentMarker) =>
-          //         transformer.fromLatLngToXYCoords(agentMarker.getLatLng))
-          //     .toList();
 
-          var swarm = serviceLocator<SwarmManager>().swarm;
+    return Stack(children: [
+      TimerBuilder.periodic(const Duration(milliseconds: 100),
+          builder: (context) {
+        return MapLayout(
+          controller: controller,
+          builder: (context, transformer) {
+            // final markerPositions = _generateMarkers(widget.swarmManager)
+            //     .map((agentMarker) =>
+            //         transformer.fromLatLngToXYCoords(agentMarker.getLatLng))
+            //     .toList();
 
-          final markerPositions = _generateMarkers(swarm, transformer);
+            var swarm = serviceLocator<SwarmManager>().swarm;
 
-          final markerWidgets = markerPositions.map(
-            (agentMarker) => _buildMarkerWidget(
-                agentMarker.cartesian, agentMarker.heading, Colors.red),
-          );
+            final markerPositions = _generateMarkers(swarm, transformer);
 
-          // final homeLocation = transformer.fromLatLngToXYCoords(
-          //     LatLng(53.43578053111544, -2.250343561172483));
+            final markerWidgets = markerPositions.map(
+              (agentMarker) => _buildMarkerWidget(
+                  agentMarker.cartesian, agentMarker.heading, Colors.red),
+            );
 
-          //final homeMarkerWidget = _buildMarkerWidget(homeLocation, Colors.black);
+            // final homeLocation = transformer.fromLatLngToXYCoords(
+            //     LatLng(53.43578053111544, -2.250343561172483));
 
-          final centerLocation = Offset(
-              transformer.constraints.biggest.width / 2,
-              transformer.constraints.biggest.height / 2);
+            //final homeMarkerWidget = _buildMarkerWidget(homeLocation, Colors.black);
 
-          // final centerMarkerWidget =
-          //     _buildMarkerWidget(centerLocation, Colors.purple);
+            final centerLocation = Offset(
+                transformer.constraints.biggest.width / 2,
+                transformer.constraints.biggest.height / 2);
 
-          return GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onDoubleTap: _onDoubleTap,
-            onScaleStart: _onScaleStart,
-            onScaleUpdate: (details) => _onScaleUpdate(details, transformer),
-            onTapUp: (details) {
-              final location = transformer.toLatLng(details.localPosition);
+            // final centerMarkerWidget =
+            //     _buildMarkerWidget(centerLocation, Colors.purple);
 
-              final clicked = transformer.toOffset(location);
-
-              print('${location.longitude}, ${location.latitude}');
-              print('${clicked.dx}, ${clicked.dy}');
-              print('${details.localPosition.dx}, ${details.localPosition.dy}');
-            },
-            child: Listener(
+            return GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onPointerSignal: (event) {
-                if (event is PointerScrollEvent) {
-                  final delta = event.scrollDelta;
+              onDoubleTap: _onDoubleTap,
+              onScaleStart: _onScaleStart,
+              onScaleUpdate: (details) => _onScaleUpdate(details, transformer),
+              onTapUp: (details) {
+                final location = transformer.toLatLng(details.localPosition);
 
-                  controller.zoom -= delta.dy / 1000.0;
-                  setState(() {});
-                }
+                final clicked = transformer.toOffset(location);
+
+                print('${location.longitude}, ${location.latitude}');
+                print('${clicked.dx}, ${clicked.dy}');
+                print(
+                    '${details.localPosition.dx}, ${details.localPosition.dy}');
               },
-              child: Stack(
-                children: [
-                  Map(
-                    controller: controller,
-                    builder: (context, x, y, z) {
-                      //Mapbox Streets
-                      final url =
-                          'https://api.mapbox.com/styles/v1/mapbox/satellite-v9/tiles/$z/$x/$y?access_token=' +
-                              mapBoxApiKey;
+              child: Listener(
+                behavior: HitTestBehavior.opaque,
+                onPointerSignal: (event) {
+                  if (event is PointerScrollEvent) {
+                    final delta = event.scrollDelta;
 
-                      return CachedNetworkImage(
-                        imageUrl: url,
-                        fit: BoxFit.cover,
-                      );
-                    },
-                  ),
-                  //homeMarkerWidget,
-                  ...markerWidgets,
-                  //centerMarkerWidget,
-                ],
+                    controller.zoom -= delta.dy / 1000.0;
+                    setState(() {});
+                  }
+                },
+                child: Stack(
+                  children: [
+                    TileLayer(
+                      builder: (context, x, y, z) {
+                        final tilesInZoom = pow(2.0, z).floor();
+
+                        while (x < 0) {
+                          x += tilesInZoom;
+                        }
+                        while (y < 0) {
+                          y += tilesInZoom;
+                        }
+
+                        x %= tilesInZoom;
+                        y %= tilesInZoom;
+                        //Mapbox Streets
+                        final url =
+                            'https://api.mapbox.com/styles/v1/mapbox/satellite-v9/tiles/$z/$x/$y?access_token=' +
+                                mapBoxApiKey;
+
+                        return CachedNetworkImage(
+                          imageUrl: url,
+                          fit: BoxFit.cover,
+                        );
+                      },
+                    ),
+                    //homeMarkerWidget,
+                    ...markerWidgets,
+                    //centerMarkerWidget,
+                  ],
+                ),
               ),
+            );
+          },
+        );
+        // floatingActionButton: FloatingActionButton(
+        //   onPressed: _gotoDefault,
+        //   tooltip: 'My Location',
+        //   child: const Icon(Icons.my_location),
+        //),
+      }),
+      Align(
+        alignment: Alignment.bottomRight,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Ink(
+            decoration: const ShapeDecoration(
+              color: Colors.lightBlue,
+              shape: CircleBorder(),
             ),
-          );
-        },
-      );
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: _gotoDefault,
-      //   tooltip: 'My Location',
-      //   child: const Icon(Icons.my_location),
-      //),
-    });
+            child: IconButton(
+              icon: const Icon(Icons.my_location),
+              color: Colors.white,
+              onPressed: () {
+                _getUserLocation();
+              },
+            ),
+          ),
+        ),
+      ),
+    ]);
   }
 }
 

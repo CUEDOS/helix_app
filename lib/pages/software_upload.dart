@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:dartssh2/dartssh2.dart';
 import 'package:helixio_app/modules/core/managers/software_upload_manager.dart';
 
 import 'package:helixio_app/pages/page_scaffold.dart';
@@ -48,5 +51,20 @@ class _SoftwareUploadPageState extends State<SoftwareUploadPage> {
           .updateDirectory(selectedDirectory);
     }
     setState(() {});
+  }
+
+  Future<void> _uploadSoftware() async {
+    final client = SSHClient(
+      await SSHSocket.connect('localhost', 22),
+      username: '<username>',
+      onPasswordRequest: () => '<password>',
+    );
+    final sftp = await client.sftp();
+    final file = await sftp.open('new_directory',
+        mode: SftpFileOpenMode.create | SftpFileOpenMode.write);
+    await file.write(
+        File(context.read<SoftwareUploadManager>().softwareDirectory)
+            .openRead()
+            .cast());
   }
 }

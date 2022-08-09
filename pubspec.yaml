@@ -44,6 +44,9 @@ dependencies:
   timer_builder: ^2.0.0
   tuple: ^2.0.0
   file_picker: ^5.0.0
+  dartssh2: ^2.7.1
+  geolocator: ^9.0.1
+  geolocator_linux: ^0.1.2
 
 dev_dependencies:
   flutter_test:
