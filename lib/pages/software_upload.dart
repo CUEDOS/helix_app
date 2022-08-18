@@ -37,16 +37,26 @@ class _SoftwareUploadPageState extends State<SoftwareUploadPage> {
                 return Text(softwareUploadManager.softwareDirectory);
               },
             ),
-          )
+          ),
+          Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ElevatedButton(
+                child: const Text('Upload'),
+                onPressed: () {
+                  _uploadSoftware();
+                },
+              ))
         ],
       ),
     );
   }
 
   Future<void> _handleSelectPress() async {
-    String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
-    if (selectedDirectory != null) {
+    //String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
+    if (result != null) {
       // User didn't cancel the picker
+      String selectedDirectory = result.files.single.path!;
       Provider.of<SoftwareUploadManager>(context, listen: false)
           .updateDirectory(selectedDirectory);
     }
@@ -55,16 +65,56 @@ class _SoftwareUploadPageState extends State<SoftwareUploadPage> {
 
   Future<void> _uploadSoftware() async {
     final client = SSHClient(
-      await SSHSocket.connect('localhost', 22),
-      username: '<username>',
-      onPasswordRequest: () => '<password>',
+      await SSHSocket.connect('192.168.0.106', 22),
+      username: 'helixio',
+      onPasswordRequest: () => 'password',
     );
+
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['json'],
+      allowMultiple: true,
+    );
+
     final sftp = await client.sftp();
-    final file = await sftp.open('new_directory',
-        mode: SftpFileOpenMode.create | SftpFileOpenMode.write);
-    await file.write(
-        File(context.read<SoftwareUploadManager>().softwareDirectory)
-            .openRead()
-            .cast());
+
+    if (result != null) {
+      List<File> filesToUpload =
+          result.paths.map((path) => File(path!)).toList();
+      for (final fileToUpload in filesToUpload) {
+        final file = await sftp.open(
+            'helixio/helixio/experiments/' + fileToUpload.uri.pathSegments.last,
+            mode: SftpFileOpenMode.create | SftpFileOpenMode.write);
+        await file.write(fileToUpload.openRead().cast());
+      }
+    } else {
+      // User canceled the picker
+    }
+
+    //await sftp.mkdir('new_directory');
+    // final file = await sftp.open('uploaded_file.txt',
+    //     mode: SftpFileOpenMode.create | SftpFileOpenMode.write);
+    // await file.write(
+    //     File(context.read<SoftwareUploadManager>().softwareDirectory)
+    //         .openRead()
+    //         .cast());
+
+    // final items = await sftp.listdir('/home/helixio/');
+    // bool hasSoftware = false;
+
+    // for (final item in items) {
+    //   if (item.filename == 'helixio') {
+    //     hasSoftware = true;
+
+    //     break;
+    //   }
+    // }
+
+    // if (!hasSoftware) {
+    //   await sftp.mkdir('helixio');
+    // }
+
+    client.close();
+    await client.done;
   }
 }

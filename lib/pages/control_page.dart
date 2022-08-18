@@ -107,6 +107,7 @@ class _ControlPageState extends State<ControlPage> {
                             'convergence_W_to_E_EZ',
                             'divergence_S_to_N_NE',
                             'divergence_S_to_N_NE',
+                            'roundabout',
                           ].map((String value) {
                             return DropdownMenuItem<String>(
                               value: value,
