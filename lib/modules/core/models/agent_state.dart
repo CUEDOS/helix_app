@@ -36,6 +36,7 @@ class AgentState {
   Map<String, double> _closeTo = {};
   agentCommand _currentCommand = agentCommand.none;
   SwarmingGains _swarmingGains = SwarmingGains(0, 0, 0, 0);
+  List<String> _experimentFiles = [];
   AgentState(this._agentID);
 
   void setConnected(String connectionStatus) {
@@ -93,6 +94,10 @@ class AgentState {
     _swarmingGains = swarmingGains;
   }
 
+  void setExperimentFiles(List<String> experimentFiles) {
+    _experimentFiles = experimentFiles;
+  }
+
   String get getAgentID => _agentID;
   bool get getConnected => _connected;
   String get getConnectionStatus => _connectionStatus;
@@ -107,4 +112,5 @@ class AgentState {
   Map<String, double> get getCloseTo => _closeTo;
   SwarmingGains get getSwarmingGains => _swarmingGains;
   agentCommand get getCurrentCommand => _currentCommand;
+  List<String> get getExperimentFiles => _experimentFiles;
 }
