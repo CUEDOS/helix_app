@@ -187,22 +187,6 @@ class MQTTManager extends ChangeNotifier {
       //var payload = recMess.payload.message;
 
       handleMessage(c[0].topic, recMess);
-      // List receivedNumber = [
-      //   payload.buffer.asByteData().getFloat32(0),
-      //   payload.buffer.asByteData().getFloat32(4),
-      //   payload.buffer.asByteData().getFloat32(8),
-      //   payload.buffer.asByteData().getFloat32(12),
-      //   payload.buffer.asByteData().getFloat32(16),
-      //   payload.buffer.asByteData().getFloat32(20),
-      //   payload.buffer.asByteData().getFloat32(24),
-      //   payload.buffer.asByteData().getFloat32(28),
-      //   payload.buffer.asByteData().getFloat32(32),
-      //   payload.buffer.asByteData().getFloat32(36),
-      // ];
-
-      // for (int i = 0; i < receivedNumber.length; i++) {
-      //   print(receivedNumber[i].toString());
-      // }
     });
   }
 
