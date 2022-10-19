@@ -7,7 +7,12 @@ import 'package:mqtt_client/mqtt_server_client.dart';
 import '../models/mqtt_app_state.dart';
 import 'package:helixio_app/modules/core/managers/swarm_manager.dart';
 import 'dart:async';
+import '../models/agent_state.dart';
 import 'package:provider/provider.dart';
+import 'dart:typed_data';
+import 'package:latlng/latlng.dart';
+import 'package:helixio_app/modules/helpers/coordinate_conversions.dart'
+    show NED;
 
 class MQTTManager extends ChangeNotifier {
   // Private instance of client
@@ -176,17 +181,80 @@ class MQTTManager extends ChangeNotifier {
     //print('EXAMPLE::Mosquitto client connected....');
     _client!.updates!.listen((List<MqttReceivedMessage<MqttMessage>> c) {
       final MqttPublishMessage recMess = c[0].payload as MqttPublishMessage;
-      final String payload =
-          MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
-      //_currentState.setReceivedText(payload);
-      //updateState();
-      serviceLocator<SwarmManager>().handleMessage(c[0].topic, payload);
-      //print(
-      // 'EXAMPLE::Change notification:: topic is <${c[0].topic}>, payload is <-- $payload -->');
-      //print('');
+      // final String payload =
+      //     MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+      //serviceLocator<SwarmManager>().handleMessage(c[0].topic, recMess.payload.message.buffer.asByteData());
+      //var payload = recMess.payload.message;
+
+      handleMessage(c[0].topic, recMess);
+      // List receivedNumber = [
+      //   payload.buffer.asByteData().getFloat32(0),
+      //   payload.buffer.asByteData().getFloat32(4),
+      //   payload.buffer.asByteData().getFloat32(8),
+      //   payload.buffer.asByteData().getFloat32(12),
+      //   payload.buffer.asByteData().getFloat32(16),
+      //   payload.buffer.asByteData().getFloat32(20),
+      //   payload.buffer.asByteData().getFloat32(24),
+      //   payload.buffer.asByteData().getFloat32(28),
+      //   payload.buffer.asByteData().getFloat32(32),
+      //   payload.buffer.asByteData().getFloat32(36),
+      // ];
+
+      // for (int i = 0; i < receivedNumber.length; i++) {
+      //   print(receivedNumber[i].toString());
+      // }
     });
-    //print(
-    //'EXAMPLE::OnConnected client callback - Client connection was sucessful');
+  }
+
+  void handleMessage(String topic, MqttPublishMessage recMess) {
+    //recMess.payload.message.buffer.asByteData();
+    var swarm = serviceLocator<SwarmManager>().swarm;
+    var topicArray = topic.split('/');
+    // check if the message is on the detection topic
+    if (topicArray[0] == 'detection') {
+      String strPayload =
+          MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+      //add an agent to the swarm
+      if (!swarm.containsKey(strPayload)) {
+        swarm[strPayload] = AgentState(strPayload);
+        serviceLocator<MQTTManager>().subscribeTo(strPayload + '/#');
+      }
+    } else {
+      // if the top level topic isnt detection it must be a drone id
+      String id = topicArray[0];
+      switch (topicArray[1]) {
+        case 'connection_status':
+          swarm[id]?.setConnected(MqttPublishPayload.bytesToStringAsString(
+              recMess.payload.message));
+          break;
+        case 'flight_mode':
+          swarm[id]?.setFlightMode(MqttPublishPayload.bytesToStringAsString(
+              recMess.payload.message));
+          break;
+        case 'battery_level':
+          swarm[id]?.setBatteryLevel(int.parse(
+              MqttPublishPayload.bytesToStringAsString(
+                  recMess.payload.message)));
+          break;
+        case 'wifi_strength':
+          swarm[id]?.setWifiStrength(int.parse(
+              MqttPublishPayload.bytesToStringAsString(
+                  recMess.payload.message)));
+          break;
+        case 'T':
+          ByteData bytesPayload = recMess.payload.message.buffer.asByteData();
+          swarm[id]?.setGeodetic(
+              LatLng(bytesPayload.getFloat32(0), bytesPayload.getFloat32(4)),
+              bytesPayload.getFloat32(8));
+
+          swarm[id]?.setNED(NED(bytesPayload.getFloat32(12),
+              bytesPayload.getFloat32(16), bytesPayload.getFloat32(20)));
+
+          swarm[id]?.setHeading(bytesPayload.getFloat32(36));
+          break;
+      }
+      serviceLocator<SwarmManager>().update();
+    }
   }
 
   void subscribeTo(String topic) {
