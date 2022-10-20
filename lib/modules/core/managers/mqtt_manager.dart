@@ -215,17 +215,16 @@ class MQTTManager extends ChangeNotifier {
           swarm[id]?.setFlightMode(MqttPublishPayload.bytesToStringAsString(
               recMess.payload.message));
           break;
-        case 'battery_level':
-          swarm[id]?.setBatteryLevel(int.parse(
-              MqttPublishPayload.bytesToStringAsString(
-                  recMess.payload.message)));
+        case 'B': //Battery level update
+          swarm[id]?.setBatteryLevel(
+              recMess.payload.message.buffer.asByteData().getInt16(0));
           break;
         case 'wifi_strength':
           swarm[id]?.setWifiStrength(int.parse(
               MqttPublishPayload.bytesToStringAsString(
                   recMess.payload.message)));
           break;
-        case 'T':
+        case 'T': //Telemetry update
           ByteData bytesPayload = recMess.payload.message.buffer.asByteData();
           swarm[id]?.setGeodetic(
               LatLng(bytesPayload.getFloat32(0), bytesPayload.getFloat32(4)),
