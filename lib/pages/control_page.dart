@@ -108,6 +108,12 @@ class _ControlPageState extends State<ControlPage> {
                             'divergence_S_to_N_NE',
                             'divergence_S_to_N_NE',
                             'roundabout',
+                            'closing_experiments/15_closing_v_exp',
+                            'closing_experiments/30_closing_v_exp',
+                            'closing_experiments/45_closing_v_exp',
+                            'closing_experiments/60_closing_v_exp',
+                            'closing_experiments/75_closing_v_exp',
+                            'closing_experiments/90_closing_v_exp',
                           ].map((String value) {
                             return DropdownMenuItem<String>(
                               value: value,
