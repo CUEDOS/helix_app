@@ -14,7 +14,7 @@ Map<String, double> altCalc(
 
   double minAlt = 10 + siteElevation;
   double maxAlt = 100 + siteElevation;
-  double altStep = 1; // altitude difference between the return alts
+  double altStep = 2; // altitude difference between the return alts
 
   int size = swarmAltitudes.length;
 

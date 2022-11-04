@@ -23,7 +23,7 @@ class ControlPage extends StatefulWidget {
 }
 
 class _ControlPageState extends State<ControlPage> {
-  String _dropdownValue = 'convergence_S_to_N_NZ';
+  String _dropdownValue = 'convergence_experiments/ribbon_convergence_in_plane';
   //final TextEditingController _messageTextController = TextEditingController();
   //final TextEditingController _topicTextController = TextEditingController();
   //final _controller = ScrollController();
@@ -99,21 +99,17 @@ class _ControlPageState extends State<ControlPage> {
                           icon: const Icon(Icons.airplanemode_active),
                           hint: const Text('Select Command'),
                           items: <String>[
-                            'Torus_S_to_N_NZ',
-                            'Circle_S_to_N_NZ',
-                            'convergence_S_to_N_NE',
-                            'convergence_S_to_N_NZ',
-                            'convergence_W_to_E_EN',
-                            'convergence_W_to_E_EZ',
-                            'divergence_S_to_N_NE',
-                            'divergence_S_to_N_NE',
-                            'roundabout',
                             'closing_experiments/15_closing_v_exp',
                             'closing_experiments/30_closing_v_exp',
                             'closing_experiments/45_closing_v_exp',
                             'closing_experiments/60_closing_v_exp',
                             'closing_experiments/75_closing_v_exp',
                             'closing_experiments/90_closing_v_exp',
+                            'convergence_experiments/ribbon_convergence_in_plane',
+                            'convergence_experiments/ribbon_convergence_out_of_plane',
+                            'convergence_experiments/cylinder_convergence',
+                            'convergence_experiments/tube_convergence',
+                            'convergence_experiments/helix_convergence',
                           ].map((String value) {
                             return DropdownMenuItem<String>(
                               value: value,
@@ -218,7 +214,7 @@ class _ControlPageState extends State<ControlPage> {
     List<String> selected = serviceLocator<SwarmManager>().selected;
     if (command == 'return') {
       var sortedSwarmALtitudes = altCalc(swarm,
-          18); //31 is altitude of hough end, change with function to get site elevation in future
+          55); //31 is altitude of hough end, 55 is altitude of bredbury, change with function to get site elevation in future
       for (String agent in swarm.keys) {
         _publishMessage(
             agent + '/home/altitude', sortedSwarmALtitudes[agent].toString());
